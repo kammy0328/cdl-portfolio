@@ -2,13 +2,15 @@ import type { Metadata } from "next";
 import GalleryGrid from "@/components/GalleryGrid";
 import { getAllStills } from "@/lib/works";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Gallery",
   description: "Color grading stills by CDL.",
 };
 
-export default function GalleryPage() {
-  const stills = getAllStills();
+export default async function GalleryPage() {
+  const stills = await getAllStills();
 
   return (
     <div className="pt-24 sm:pt-28">

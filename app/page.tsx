@@ -2,8 +2,10 @@ import WorkCard from "@/components/WorkCard";
 import Reveal from "@/components/Reveal";
 import { getWorksSorted } from "@/lib/works";
 
-export default function Home() {
-  const works = getWorksSorted();
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const works = await getWorksSorted();
 
   return (
     <section className="wrap pb-24 pt-24 sm:pt-28">

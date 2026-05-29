@@ -1,14 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { works } from "@/data/works";
 import { getWorkBySlug, getAdjacentWorks, formatDate } from "@/lib/works";
 import VideoEmbed from "@/components/VideoEmbed";
 import StillsGallery from "@/components/StillsGallery";
 
-export function generateStaticParams() {
-  return works.map((w) => ({ slug: w.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -16,7 +13,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const work = getWorkBySlug(slug);
+  const work = await getWorkBySlug(slug);
   if (!work) return { title: "Not found" };
   const title = `${work.title} — ${work.artist}`;
   return {
@@ -35,10 +32,10 @@ export default async function WorkPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const work = getWorkBySlug(slug);
+  const work = await getWorkBySlug(slug);
   if (!work) notFound();
 
-  const { prev, next } = getAdjacentWorks(slug);
+  const { prev, next } = await getAdjacentWorks(slug);
 
   return (
     <article className="pt-28 sm:pt-32">
@@ -71,9 +68,8 @@ export default async function WorkPage({
           <VideoEmbed youtubeId={work.youtubeId} title={`${work.title} — ${work.artist}`} />
         </div>
 
-        {/* 설명 + 크레딧 / 정보 */}
+        {/* 크레딧 / 정보 */}
         <div className="mt-14 grid gap-12 lg:grid-cols-12">
-          {/* 크레딧 */}
           <section className="lg:col-span-8">
             {work.description && (
               <p className="mb-10 max-w-2xl text-base leading-relaxed text-bone-dim">
@@ -100,7 +96,6 @@ export default async function WorkPage({
             )}
           </section>
 
-          {/* 정보 */}
           <aside className="lg:col-span-4">
             <div className="rounded-sm border border-ink-line bg-ink-card p-6">
               <dl className="space-y-4">

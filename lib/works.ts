@@ -1,24 +1,48 @@
-import { works, type Work } from "@/data/works";
+import { cache } from "react";
+import { list } from "@vercel/blob";
+import { works as seedWorks, type Work } from "@/data/works";
+
+export const WORKS_BLOB_PATH = "works.json";
+
+/**
+ * 포트폴리오 데이터 로드 — Vercel Blob의 works.json을 우선 사용하고,
+ * 없거나 오류가 나면 시드 데이터(data/works.ts)로 안전하게 대체합니다.
+ * (cache로 같은 요청 내 중복 호출을 1회로 합칩니다)
+ */
+export const getWorks = cache(async (): Promise<Work[]> => {
+  const token = process.env.BLOB_READ_WRITE_TOKEN;
+  if (!token) return seedWorks;
+  try {
+    const { blobs } = await list({ prefix: WORKS_BLOB_PATH, limit: 10, token });
+    const found = blobs.find((b) => b.pathname === WORKS_BLOB_PATH);
+    if (!found) return seedWorks;
+    const res = await fetch(found.url, { cache: "no-store" });
+    if (!res.ok) return seedWorks;
+    const data = (await res.json()) as Work[];
+    return Array.isArray(data) && data.length >= 0 ? data : seedWorks;
+  } catch {
+    return seedWorks;
+  }
+});
 
 /** 유튜브 업로드 날짜 기준 최신순 정렬 */
-export function getWorksSorted(): Work[] {
-  return [...works].sort(
+export async function getWorksSorted(): Promise<Work[]> {
+  const w = await getWorks();
+  return [...w].sort(
     (a, b) =>
       new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
   );
 }
 
-/** slug로 단일 작업 조회 */
-export function getWorkBySlug(slug: string): Work | undefined {
-  return works.find((w) => w.slug === slug);
+export async function getWorkBySlug(slug: string): Promise<Work | undefined> {
+  return (await getWorks()).find((w) => w.slug === slug);
 }
 
-/** 최신순 정렬된 목록에서 이전/다음 작업 구하기 */
-export function getAdjacentWorks(slug: string): {
+export async function getAdjacentWorks(slug: string): Promise<{
   prev: Work | null;
   next: Work | null;
-} {
-  const sorted = getWorksSorted();
+}> {
+  const sorted = await getWorksSorted();
   const i = sorted.findIndex((w) => w.slug === slug);
   if (i === -1) return { prev: null, next: null };
   return {
@@ -37,7 +61,8 @@ export interface GalleryStill {
 }
 
 /** 모든 작업의 스틸을 하나의 목록으로 평탄화 (갤러리 페이지용) */
-export function getAllStills(): GalleryStill[] {
+export async function getAllStills(): Promise<GalleryStill[]> {
+  const works = await getWorks();
   return works.flatMap((w) =>
     w.stills.map((s) => ({
       src: s.src,
@@ -50,7 +75,7 @@ export function getAllStills(): GalleryStill[] {
   );
 }
 
-/** Fisher–Yates 셔플 — 갤러리에서 매 방문마다 랜덤 정렬에 사용 */
+/** Fisher–Yates 셔플 — 갤러리 랜덤 정렬 */
 export function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -60,7 +85,7 @@ export function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-/** 날짜를 YYYY.MM.DD 형태로 표기 */
+/** 날짜를 YYYY.MM.DD 형태로 */
 export function formatDate(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
