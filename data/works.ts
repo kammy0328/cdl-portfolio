@@ -1,43 +1,42 @@
 // ============================================================================
-//  CDL 포트폴리오 작업 목록
+//  CDL 포트폴리오 작업 목록 (시드 데이터)
 // ----------------------------------------------------------------------------
-//  ✅ 새 작업을 추가하려면 아래 works 배열에 항목을 하나 더 넣으면 됩니다.
-//     사이트는 publishedAt(유튜브 업로드 날짜) 기준으로 자동 정렬됩니다.
+//  ※ 관리자 페이지(/admin)에서 업로드하면 클라우드(Vercel Blob)의 works.json 에
+//     저장되고, 사이트는 그 데이터를 우선 사용합니다. 이 파일은 초기/대체용입니다.
 //
 //  ✅ 크레딧(credits)은 비워둬도 되고(= []), 아주 길어도 됩니다.
-//     { role: "직무", name: "이름" } 형태로 원하는 만큼 추가하세요.
-//
-//  ✅ 색보정 스틸(stills)은 /public/stills/<slug>/ 폴더에 이미지를 넣은 뒤
-//     "/stills/<slug>/파일명.jpg" 경로를 배열에 추가하면 됩니다.
-//     스틸이 없으면 빈 배열([])로 두면 됩니다.
+//  ✅ 색보정 스틸(stills)은 { src, w, h } 객체. w/h(픽셀 크기)는 선택이며,
+//     없으면 화면에서 자동 측정합니다. 비율(16:9·4:3·9:16 등) 무관하게 배치됩니다.
 // ============================================================================
 
 export interface Credit {
   /** 직무 — 예: "감독", "촬영감독", "편집", "색보정" */
   role: string;
-  /** 이름 — 예: "홍길동" 또는 "OOO 스튜디오" */
+  /** 이름 */
   name: string;
 }
 
+export interface Still {
+  /** 이미지 경로 또는 URL */
+  src: string;
+  /** 원본 가로 픽셀 (선택) */
+  w?: number;
+  /** 원본 세로 픽셀 (선택) */
+  h?: number;
+}
+
 export interface Work {
-  /** URL에 쓰이는 고유 id (영문/숫자/하이픈). 예: "memi-badidea" */
   slug: string;
-  /** 작품 제목 */
   title: string;
-  /** 아티스트 / 채널 / 클라이언트 */
   artist: string;
-  /** 분류 — 예: "Music Video", "Commercial", "Film" */
   category: string;
-  /** 유튜브 영상 ID — 주소 youtu.be/XXXX 또는 watch?v=XXXX 의 XXXX 부분 */
+  /** 유튜브 영상 ID */
   youtubeId: string;
   /** 유튜브 업로드 날짜 (YYYY-MM-DD) — 정렬 기준 */
   publishedAt: string;
-  /** 한 줄 소개 (선택) */
   description?: string;
-  /** 참여 스태프 크레딧 — 없으면 [] */
   credits: Credit[];
-  /** 색보정 스틸 이미지 경로 — 없으면 [] */
-  stills: string[];
+  stills: Still[];
 }
 
 export const works: Work[] = [
@@ -49,16 +48,12 @@ export const works: Work[] = [
     youtubeId: "nZS9J20OWog",
     publishedAt: "2026-05-28",
     description: "",
-    credits: [
-      // 실제 크레딧으로 자유롭게 추가/수정하세요. (예시는 정확히 아는 항목만 넣어두었습니다)
-      { role: "색보정", name: "CDL" },
-    ],
+    credits: [{ role: "색보정", name: "CDL" }],
     stills: [
-      // 색보정 스틸을 /public/stills/zerobaseone-love-aint-easy/ 에 넣고 경로를 추가하세요.
-      "/stills/zerobaseone-love-aint-easy/still-01.jpg",
-      "/stills/zerobaseone-love-aint-easy/still-02.jpg",
-      "/stills/zerobaseone-love-aint-easy/still-03.jpg",
-      "/stills/zerobaseone-love-aint-easy/still-04.jpg",
+      { src: "/stills/zerobaseone-love-aint-easy/still-01.jpg" },
+      { src: "/stills/zerobaseone-love-aint-easy/still-02.jpg" },
+      { src: "/stills/zerobaseone-love-aint-easy/still-03.jpg" },
+      { src: "/stills/zerobaseone-love-aint-easy/still-04.jpg" },
     ],
   },
   {
@@ -69,14 +64,12 @@ export const works: Work[] = [
     youtubeId: "i_-pZiZJ7MQ",
     publishedAt: "2026-04-29",
     description: "",
-    credits: [
-      { role: "색보정", name: "CDL" },
-    ],
+    credits: [{ role: "색보정", name: "CDL" }],
     stills: [
-      "/stills/memi-badidea/still-01.jpg",
-      "/stills/memi-badidea/still-02.jpg",
-      "/stills/memi-badidea/still-03.jpg",
-      "/stills/memi-badidea/still-04.jpg",
+      { src: "/stills/memi-badidea/still-01.jpg" },
+      { src: "/stills/memi-badidea/still-02.jpg" },
+      { src: "/stills/memi-badidea/still-03.jpg" },
+      { src: "/stills/memi-badidea/still-04.jpg" },
     ],
   },
 ];

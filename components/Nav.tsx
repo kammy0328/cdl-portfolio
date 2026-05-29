@@ -42,7 +42,7 @@ export default function Nav() {
       <nav className="wrap flex h-16 items-center justify-between">
         <Link
           href="/"
-          className="text-lg font-bold tracking-[0.3em] text-bone transition hover:text-accent-warm"
+          className="text-2xl font-bold tracking-[0.3em] text-bone"
           aria-label="CDL home"
         >
           {site.name}
@@ -54,7 +54,7 @@ export default function Nav() {
             <li key={l.href}>
               <Link
                 href={l.href}
-                className={`font-mono text-xs uppercase tracking-[0.18em] transition hover:text-bone ${
+                className={`font-mono text-sm font-medium uppercase tracking-[0.1em] transition-colors hover:text-bone ${
                   isActive(l.href) ? "text-bone" : "text-bone-dim"
                 }`}
               >
@@ -89,7 +89,7 @@ export default function Nav() {
               <li key={l.href}>
                 <Link
                   href={l.href}
-                  className="block py-3 font-mono text-sm uppercase tracking-[0.18em] text-bone-dim transition hover:text-bone"
+                  className="block py-3 font-mono text-base font-medium uppercase tracking-[0.1em] text-bone-dim transition hover:text-bone"
                 >
                   {l.label}
                 </Link>

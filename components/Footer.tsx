@@ -9,7 +9,7 @@ export default function Footer() {
           <div className="text-lg font-bold tracking-[0.3em] text-bone">
             {site.name}
           </div>
-          <p className="label mt-3">Colorist · Remote · Korea</p>
+          <p className="label mt-3">NO LUT</p>
         </div>
 
         <div>

@@ -56,7 +56,7 @@ export default function Lightbox({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 backdrop-blur-md animate-fade-in"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md animate-fade-in"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -117,25 +117,18 @@ export default function Lightbox({
           {current.caption && (
             <span className="text-sm text-bone-dim">{current.caption}</span>
           )}
-          <div className="flex items-center gap-5">
-            {current.href && (
-              <Link
-                href={current.href}
-                onClick={(e) => e.stopPropagation()}
-                className="group inline-flex items-center gap-1.5 rounded-sm border border-ink-line bg-white/5 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.15em] text-bone transition hover:border-bone-dim hover:bg-white/10"
-              >
-                View Project
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition group-hover:translate-x-0.5">
-                  <path d="M5 12h14M13 6l6 6-6 6" />
-                </svg>
-              </Link>
-            )}
-            {images.length > 1 && (
-              <span className="label">
-                {index + 1} / {images.length}
-              </span>
-            )}
-          </div>
+          {current.href && (
+            <Link
+              href={current.href}
+              onClick={(e) => e.stopPropagation()}
+              className="group inline-flex items-center gap-1.5 rounded-sm border border-ink-line bg-white/5 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.15em] text-bone transition hover:border-bone-dim hover:bg-white/10"
+            >
+              View Project
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition group-hover:translate-x-0.5">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </Link>
+          )}
         </figcaption>
       </figure>
     </div>

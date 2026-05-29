@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <div className="wrap pt-28 sm:pt-32">
-      <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">문의</h1>
+      <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">CONTACT</h1>
 
       <div className="mt-12 grid gap-12 lg:grid-cols-12">
         <div className="lg:col-span-5">

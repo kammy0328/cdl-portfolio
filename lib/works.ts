@@ -29,6 +29,8 @@ export function getAdjacentWorks(slug: string): {
 
 export interface GalleryStill {
   src: string;
+  w?: number;
+  h?: number;
   workSlug: string;
   workTitle: string;
   artist: string;
@@ -37,8 +39,10 @@ export interface GalleryStill {
 /** 모든 작업의 스틸을 하나의 목록으로 평탄화 (갤러리 페이지용) */
 export function getAllStills(): GalleryStill[] {
   return works.flatMap((w) =>
-    w.stills.map((src) => ({
-      src,
+    w.stills.map((s) => ({
+      src: s.src,
+      w: s.w,
+      h: s.h,
       workSlug: w.slug,
       workTitle: w.title,
       artist: w.artist,
