@@ -20,7 +20,12 @@ export const getWorks = cache(async (): Promise<Work[]> => {
     const res = await fetch(`${found.url}?t=${Date.now()}`, { cache: "no-store" });
     if (!res.ok) return seedWorks;
     const data = (await res.json()) as Work[];
-    return Array.isArray(data) && data.length >= 0 ? data : seedWorks;
+    if (!Array.isArray(data)) return seedWorks;
+    // 썸네일(유튜브 커버 = 시드의 still-01)은 스틸로 노출하지 않음
+    return data.map((w) => ({
+      ...w,
+      stills: (w.stills || []).filter((s) => !String(s.src).endsWith("still-01.jpg")),
+    }));
   } catch {
     return seedWorks;
   }

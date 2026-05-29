@@ -50,7 +50,6 @@ export const works: Work[] = [
     description: "",
     credits: [{ role: "색보정", name: "CDL" }],
     stills: [
-      { src: "/stills/zerobaseone-love-aint-easy/still-01.jpg" },
       { src: "/stills/zerobaseone-love-aint-easy/still-02.jpg" },
       { src: "/stills/zerobaseone-love-aint-easy/still-03.jpg" },
       { src: "/stills/zerobaseone-love-aint-easy/still-04.jpg" },
@@ -66,7 +65,6 @@ export const works: Work[] = [
     description: "",
     credits: [{ role: "색보정", name: "CDL" }],
     stills: [
-      { src: "/stills/memi-badidea/still-01.jpg" },
       { src: "/stills/memi-badidea/still-02.jpg" },
       { src: "/stills/memi-badidea/still-03.jpg" },
       { src: "/stills/memi-badidea/still-04.jpg" },

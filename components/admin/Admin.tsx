@@ -228,7 +228,7 @@ export default function Admin() {
   return (
     <div className="wrap pt-24 pb-32">
       {/* 헤더 */}
-      <div className="sticky top-16 z-30 -mx-5 mb-8 flex items-center justify-between gap-3 border-b border-ink-line bg-ink/90 px-5 py-4 backdrop-blur-md sm:-mx-8 sm:px-8">
+      <div className="sticky top-16 z-30 -mx-5 mb-8 flex flex-wrap items-center justify-between gap-x-3 gap-y-3 border-b border-ink-line bg-ink/90 px-5 py-4 backdrop-blur-md sm:-mx-8 sm:px-8">
         {editing === null ? (
           <h1 className="text-xl font-bold tracking-[0.2em]">ADMIN</h1>
         ) : (
@@ -236,7 +236,7 @@ export default function Admin() {
             ← 작업 목록
           </button>
         )}
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {uploading > 0 && <span className="label !text-accent-warm">업로드 중 {uploading}…</span>}
           {msg && <span className="label !text-accent-cool">{msg}</span>}
           {editing === null && (
