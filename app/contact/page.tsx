@@ -12,7 +12,7 @@ export default function ContactPage() {
     <div className="wrap pt-28 sm:pt-32">
       <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">CONTACT</h1>
 
-      <div className="mt-12 grid gap-12 lg:grid-cols-12">
+      <div className="mt-12 grid items-start gap-12 lg:grid-cols-12">
         <div className="lg:col-span-5">
           <div className="space-y-6">
             <div>

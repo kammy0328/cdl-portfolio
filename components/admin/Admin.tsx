@@ -124,9 +124,12 @@ export default function Admin() {
     const r = await fetch(`/api/admin/youtube?id=${encodeURIComponent(id)}`).then((r) => r.json());
     if (r.ok) {
       const w = works[i];
+      const isMV = w.category === "Music Video";
       update(i, {
         title: w.title || r.title || "",
-        artist: w.artist || r.artist || "",
+        ...(isMV
+          ? { group: w.group || r.artist || "" }
+          : { artist: w.artist || r.artist || "" }),
         publishedAt: w.publishedAt || r.publishedAt || "",
         slug: w.slug || slugify(r.title || ""),
       });
@@ -363,10 +366,23 @@ function WorkEditor({
             <span className="label">제목</span>
             <input className={`${fieldCls} mt-1`} value={work.title} onChange={(e) => onChange({ title: e.target.value })} />
           </label>
-          <label className="block">
-            <span className="label">아티스트</span>
-            <input className={`${fieldCls} mt-1`} value={work.artist} onChange={(e) => onChange({ artist: e.target.value })} />
-          </label>
+          {work.category === "Music Video" ? (
+            <>
+              <label className="block">
+                <span className="label">그룹명 (선택)</span>
+                <input className={`${fieldCls} mt-1`} value={work.group ?? ""} onChange={(e) => onChange({ group: e.target.value })} placeholder="예: ZEROBASEONE" />
+              </label>
+              <label className="block">
+                <span className="label">아티스트명 (선택)</span>
+                <input className={`${fieldCls} mt-1`} value={work.artist} onChange={(e) => onChange({ artist: e.target.value })} placeholder="예: 석매튜" />
+              </label>
+            </>
+          ) : (
+            <label className="block">
+              <span className="label">아티스트 / 클라이언트</span>
+              <input className={`${fieldCls} mt-1`} value={work.artist} onChange={(e) => onChange({ artist: e.target.value })} />
+            </label>
+          )}
           <label className="block">
             <span className="label">카테고리</span>
             <select className={`${fieldCls} mt-1`} value={work.category} onChange={(e) => onChange({ category: e.target.value })}>

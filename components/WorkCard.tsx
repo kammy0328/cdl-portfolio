@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Work } from "@/data/works";
+import { displayArtist } from "@/lib/works";
 import YouTubeThumb from "./YouTubeThumb";
 
 export default function WorkCard({ work }: { work: Work }) {
@@ -16,7 +17,7 @@ export default function WorkCard({ work }: { work: Work }) {
         <h3 className="text-lg font-medium tracking-tight text-bone">
           {work.title}
         </h3>
-        <p className="mt-1 text-sm text-bone-dim">{work.artist}</p>
+        <p className="mt-1 text-sm text-bone-dim">{displayArtist(work)}</p>
       </div>
     </Link>
   );

@@ -28,7 +28,10 @@ export interface Still {
 export interface Work {
   slug: string;
   title: string;
+  /** 아티스트/멤버명 (뮤직비디오는 그룹명과 분리) — 공란 가능 */
   artist: string;
+  /** 그룹명 (뮤직비디오) — 선택, 공란 가능 */
+  group?: string;
   category: string;
   /** 유튜브 영상 ID */
   youtubeId: string;
@@ -43,12 +46,31 @@ export const works: Work[] = [
   {
     slug: "zerobaseone-love-aint-easy",
     title: "Love Ain't Easy",
-    artist: "ZEROBASEONE · Seok Matthew",
+    artist: "석매튜",
+    group: "ZEROBASEONE",
     category: "Music Video",
     youtubeId: "nZS9J20OWog",
     publishedAt: "2026-05-28",
     description: "",
-    credits: [{ role: "색보정", name: "CDL" }],
+    credits: [
+      { role: "Production", name: "Memudworks" },
+      { role: "Director", name: "Yang Siwook" },
+      { role: "Producer", name: "Baik Sooah" },
+      { role: "Assistant Director", name: "sm.lee" },
+      { role: "DOP", name: "Choi Youngwoo" },
+      { role: "Camera crew", name: "Yoo Hyunjin, Heo jun, Woo taemin" },
+      { role: "Gaffer", name: "Park Sunghun" },
+      { role: "Lighting crew", name: "Sung Woojin, Park Jinwoo, Yoon Changhwan, Lee Hyunwoo, Yoon Dowoon" },
+      { role: "Show Light", name: "J SHOW COMPANY" },
+      { role: "Art Director", name: "Kim Dooeun" },
+      { role: "Art Team", name: "Hwang Yooju" },
+      { role: "FD", name: "Kim Daegun, Lee Byungcheol" },
+      { role: "Edit", name: "Yang Siwook" },
+      { role: "DI", name: "CDL (@cdl_nolut)" },
+      { role: "Beauty", name: "DIAP (@digital_apgujeong)" },
+      { role: "Clean", name: "DIAP, Pixelsurgery" },
+      { role: "Comp", name: "Pixelsurgery" },
+    ],
     stills: [
       { src: "/stills/zerobaseone-love-aint-easy/still-02.jpg" },
       { src: "/stills/zerobaseone-love-aint-easy/still-03.jpg" },

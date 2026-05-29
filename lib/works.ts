@@ -76,9 +76,14 @@ export async function getAllStills(): Promise<GalleryStill[]> {
       h: s.h,
       workSlug: w.slug,
       workTitle: w.title,
-      artist: w.artist,
+      artist: displayArtist(w),
     }))
   );
+}
+
+/** 그룹 + 아티스트를 합쳐 표시 (둘 중 하나가 공란이면 나머지만) */
+export function displayArtist(w: { group?: string; artist?: string }): string {
+  return [w.group, w.artist].filter(Boolean).join(" ");
 }
 
 /** Fisher–Yates 셔플 — 갤러리 랜덤 정렬 */

@@ -71,18 +71,6 @@ ${form.message}`;
 
   return (
     <form onSubmit={onSubmit} className="space-y-5">
-      {/* 허니팟: 사용자에겐 숨김, 봇 탐지용 */}
-      <input
-        type="text"
-        name="website"
-        value={form.website}
-        onChange={update("website")}
-        tabIndex={-1}
-        autoComplete="off"
-        aria-hidden="true"
-        style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }}
-      />
-
       {status === "fallback" && (
         <p className="rounded-sm border border-accent-warm/30 bg-accent-warm/5 px-4 py-3 text-sm text-bone-dim">
           메일 앱이 열리지 않았다면{" "}
@@ -147,6 +135,18 @@ ${form.message}`;
       >
         {status === "sending" ? "전송 중…" : "보내기"}
       </button>
+
+      {/* 허니팟: 사용자에겐 숨김, 봇 탐지용 (레이아웃 영향 없도록 폼 끝에 배치) */}
+      <input
+        type="text"
+        name="website"
+        value={form.website}
+        onChange={update("website")}
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }}
+      />
     </form>
   );
 }

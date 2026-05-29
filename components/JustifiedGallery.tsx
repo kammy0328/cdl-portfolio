@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Lightbox, { type LightboxImage } from "./Lightbox";
 
 export interface JItem {
@@ -108,21 +108,13 @@ export default function JustifiedGallery({ items }: { items: JItem[] }) {
               style={{ gap: GAP, marginBottom: GAP }}
             >
               {row.cells.map((cell) => (
-                <button
+                <Tile
                   key={cell.item.src + cell.idx}
+                  src={cell.item.src}
+                  width={cell.w}
+                  height={row.h}
                   onClick={() => setIdx(cell.idx)}
-                  className="relative shrink-0 overflow-hidden bg-ink-soft"
-                  style={{ width: cell.w, height: row.h }}
-                  aria-label="스틸 크게 보기"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={cell.item.src}
-                    alt=""
-                    loading="lazy"
-                    className="h-full w-full object-cover"
-                  />
-                </button>
+                />
               ))}
             </div>
           ))
@@ -138,5 +130,69 @@ export default function JustifiedGallery({ items }: { items: JItem[] }) {
         onIndexChange={setIdx}
       />
     </>
+  );
+}
+
+/**
+ * 갤러리 타일 — 첫 화면에 보이는 이미지는 즉시 표시,
+ * 스크롤로 화면에 들어오는(처음엔 안 보이던) 이미지는 서서히 페이드인.
+ */
+function Tile({
+  src,
+  width,
+  height,
+  onClick,
+}: {
+  src: string;
+  width: number;
+  height: number;
+  onClick: () => void;
+}) {
+  const ref = useRef<HTMLButtonElement>(null);
+  const [shown, setShown] = useState(false);
+  const [animate, setAnimate] = useState(false);
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const inView = r.top < window.innerHeight && r.bottom > 0;
+    if (inView) {
+      setShown(true); // 첫 화면: 애니메이션 없이 즉시
+      return;
+    }
+    setAnimate(true); // 스크롤로 진입하는 항목만 페이드
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          setShown(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "0px 0px -8% 0px", threshold: 0.04 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <button
+      ref={ref}
+      onClick={onClick}
+      aria-label="스틸 크게 보기"
+      className="relative shrink-0 overflow-hidden bg-ink-soft"
+      style={{
+        width,
+        height,
+        opacity: shown ? 1 : 0,
+        transform: shown ? "none" : "translateY(24px)",
+        transition: animate
+          ? "opacity 0.7s ease, transform 0.7s cubic-bezier(0.16,1,0.3,1)"
+          : "none",
+      }}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt="" loading="lazy" className="h-full w-full object-cover" />
+    </button>
   );
 }

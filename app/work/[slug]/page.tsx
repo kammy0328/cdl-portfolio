@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getWorkBySlug, getAdjacentWorks, formatDate } from "@/lib/works";
+import { getWorkBySlug, getAdjacentWorks, formatDate, displayArtist } from "@/lib/works";
 import VideoEmbed from "@/components/VideoEmbed";
 import StillsGallery from "@/components/StillsGallery";
 
@@ -60,7 +60,7 @@ export default async function WorkPage({
           <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">
             {work.title}
           </h1>
-          <p className="mt-3 text-lg text-bone-dim">{work.artist}</p>
+          <p className="mt-3 text-lg text-bone-dim">{displayArtist(work)}</p>
         </header>
 
         {/* 영상 */}
@@ -89,7 +89,9 @@ export default async function WorkPage({
                     <dt className="label w-28 shrink-0 pt-0.5 sm:w-40">
                       {c.role}
                     </dt>
-                    <dd className="text-sm text-bone sm:text-base">{c.name}</dd>
+                    <dd className="text-sm text-bone sm:text-base">
+                      <CreditName name={c.name} />
+                    </dd>
                   </div>
                 ))}
               </dl>
@@ -101,7 +103,7 @@ export default async function WorkPage({
               <dl className="space-y-4">
                 <div>
                   <dt className="label">아티스트</dt>
-                  <dd className="mt-1 text-sm text-bone">{work.artist}</dd>
+                  <dd className="mt-1 text-sm text-bone">{displayArtist(work)}</dd>
                 </div>
                 <div>
                   <dt className="label">카테고리</dt>
@@ -149,5 +151,29 @@ export default async function WorkPage({
         </nav>
       </div>
     </article>
+  );
+}
+
+/** 크레딧 이름 안의 @인스타핸들을 클릭 가능한 링크로 변환 */
+function CreditName({ name }: { name: string }) {
+  const parts = name.split(/(@[A-Za-z0-9._]+)/g);
+  return (
+    <>
+      {parts.map((p, i) =>
+        /^@[A-Za-z0-9._]+$/.test(p) ? (
+          <a
+            key={i}
+            href={`https://instagram.com/${p.slice(1).replace(/\.+$/, "")}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-accent-warm hover:underline"
+          >
+            {p}
+          </a>
+        ) : (
+          <span key={i}>{p}</span>
+        )
+      )}
+    </>
   );
 }
