@@ -21,7 +21,7 @@ export async function generateMetadata({
   const title = `${work.title} — ${work.artist}`;
   return {
     title,
-    description: work.description || `${work.artist} · ${work.category} 색보정 — CDL`,
+    description: work.description || `${work.artist} · ${work.category} — color by CDL`,
     openGraph: {
       title,
       images: [`https://i.ytimg.com/vi/${work.youtubeId}/maxresdefault.jpg`],
@@ -45,13 +45,13 @@ export default async function WorkPage({
       <div className="wrap">
         {/* 뒤로 */}
         <Link
-          href="/#work"
+          href="/"
           className="label inline-flex items-center gap-2 transition hover:text-bone"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="m15 18-6-6 6-6" />
           </svg>
-          작업 목록
+          Work
         </Link>
 
         {/* 헤더 */}
@@ -80,14 +80,9 @@ export default async function WorkPage({
                 {work.description}
               </p>
             )}
-            <p className="eyebrow">Credits</p>
-            <h2 className="mb-6 mt-3 text-2xl font-semibold tracking-tight">
-              참여 스태프
-            </h2>
+            <h2 className="mb-6 text-2xl font-semibold tracking-tight">Credits</h2>
             {work.credits.length === 0 ? (
-              <p className="text-sm text-bone-faint">
-                크레딧 정보가 없습니다.
-              </p>
+              <p className="text-sm text-bone-faint">No credits listed.</p>
             ) : (
               <dl className="max-w-2xl">
                 {work.credits.map((c, i) => (
@@ -130,7 +125,7 @@ export default async function WorkPage({
                 rel="noopener noreferrer"
                 className="link-underline mt-6 inline-block text-sm font-medium text-accent-warm"
               >
-                YouTube에서 보기 →
+                Watch on YouTube →
               </a>
             </div>
           </aside>
@@ -138,10 +133,7 @@ export default async function WorkPage({
 
         {/* 색보정 스틸 */}
         <section className="mt-20 border-t border-ink-line pt-14">
-          <p className="eyebrow">Stills</p>
-          <h2 className="mb-8 mt-3 text-2xl font-semibold tracking-tight">
-            색보정 스틸
-          </h2>
+          <h2 className="mb-8 text-2xl font-semibold tracking-tight">Stills</h2>
           <StillsGallery stills={work.stills} title={work.title} />
         </section>
 
@@ -150,7 +142,7 @@ export default async function WorkPage({
           <div>
             {prev && (
               <Link href={`/work/${prev.slug}`} className="group block">
-                <span className="label">← 이전 작업</span>
+                <span className="label">← Prev</span>
                 <span className="mt-1 block text-sm font-medium text-bone-dim transition group-hover:text-bone">
                   {prev.title}
                 </span>
@@ -160,7 +152,7 @@ export default async function WorkPage({
           <div className="text-right">
             {next && (
               <Link href={`/work/${next.slug}`} className="group block">
-                <span className="label">다음 작업 →</span>
+                <span className="label">Next →</span>
                 <span className="mt-1 block text-sm font-medium text-bone-dim transition group-hover:text-bone">
                   {next.title}
                 </span>

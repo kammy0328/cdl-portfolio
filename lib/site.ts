@@ -4,7 +4,7 @@ export const site = {
   // 헤더/히어로에 쓰이는 한 줄 소개
   tagline: "Colorist",
   description:
-    "원격(온라인)으로 작업하는 컬러리스트 CDL의 색보정 포트폴리오. 뮤직비디오, 광고, 필름 색보정.",
+    "Color grading portfolio of CDL — a remote colorist for music videos, commercials, and film.",
   email: "cdlnolut@gmail.com",
   instagram: "cdl_nolut",
   instagramUrl: "https://instagram.com/cdl_nolut",

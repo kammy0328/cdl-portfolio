@@ -6,16 +6,16 @@ export default function NotFound() {
       <div>
         <p className="eyebrow">404</p>
         <h1 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
-          페이지를 찾을 수 없습니다
+          Page not found
         </h1>
         <p className="mt-3 text-sm text-bone-dim">
-          주소가 변경되었거나 존재하지 않는 페이지입니다.
+          The page you&apos;re looking for doesn&apos;t exist or has moved.
         </p>
         <Link
           href="/"
           className="mt-8 inline-block rounded-sm bg-bone px-7 py-3.5 text-sm font-medium text-ink transition hover:bg-accent-warm"
         >
-          홈으로
+          Back to Work
         </Link>
       </div>
     </div>

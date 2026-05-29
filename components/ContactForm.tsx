@@ -5,7 +5,7 @@ import { site } from "@/lib/site";
 
 type Status = "idle" | "sending" | "success" | "fallback";
 
-const projectTypes = ["뮤직비디오", "광고 / CF", "필름 / 단편", "기타"];
+const projectTypes = ["Music Video", "Commercial", "Film", "Other"];
 
 export default function ContactForm() {
   const [status, setStatus] = useState<Status>("idle");
@@ -22,10 +22,10 @@ export default function ContactForm() {
   ) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
   const mailtoHref = () => {
-    const subject = `[CDL 문의] ${form.name || ""} · ${form.type}`;
-    const body = `이름: ${form.name}
-이메일: ${form.email}
-프로젝트 유형: ${form.type}
+    const subject = `[CDL Inquiry] ${form.name || ""} · ${form.type}`;
+    const body = `Name: ${form.name}
+Email: ${form.email}
+Project type: ${form.type}
 
 ${form.message}`;
     return `mailto:${site.email}?subject=${encodeURIComponent(
@@ -64,9 +64,9 @@ ${form.message}`;
             <path d="M20 6 9 17l-5-5" />
           </svg>
         </div>
-        <h3 className="mt-4 text-lg font-medium">문의가 전송되었습니다.</h3>
+        <h3 className="mt-4 text-lg font-medium">Message sent.</h3>
         <p className="mt-2 text-sm text-bone-dim">
-          빠른 시일 내에 {site.email} 에서 답변드리겠습니다. 감사합니다.
+          Thanks — I&apos;ll get back to you at {site.email} shortly.
         </p>
       </div>
     );
@@ -91,27 +91,27 @@ ${form.message}`;
 
       {status === "fallback" && (
         <p className="rounded-sm border border-accent-warm/30 bg-accent-warm/5 px-4 py-3 text-sm text-bone-dim">
-          메일 앱이 열리지 않았다면{" "}
+          If your mail app didn&apos;t open,{" "}
           <a href={mailtoHref()} className="text-accent-warm underline">
-            여기를 눌러
+            click here
           </a>{" "}
-          {site.email} 로 보내주세요.
+          to email {site.email}.
         </p>
       )}
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
-          <label className="label mb-2 block">이름 *</label>
+          <label className="label mb-2 block">Name *</label>
           <input
             required
             value={form.name}
             onChange={update("name")}
             className={field}
-            placeholder="성함 또는 회사명"
+            placeholder="Your name or company"
           />
         </div>
         <div>
-          <label className="label mb-2 block">이메일 *</label>
+          <label className="label mb-2 block">Email *</label>
           <input
             required
             type="email"
@@ -124,7 +124,7 @@ ${form.message}`;
       </div>
 
       <div>
-        <label className="label mb-2 block">프로젝트 유형</label>
+        <label className="label mb-2 block">Project Type</label>
         <select value={form.type} onChange={update("type")} className={field}>
           {projectTypes.map((t) => (
             <option key={t} value={t} className="bg-ink-soft">
@@ -135,14 +135,14 @@ ${form.message}`;
       </div>
 
       <div>
-        <label className="label mb-2 block">문의 내용 *</label>
+        <label className="label mb-2 block">Message *</label>
         <textarea
           required
           value={form.message}
           onChange={update("message")}
           rows={6}
           className={`${field} resize-none`}
-          placeholder="작업 일정, 분량(러닝타임), 촬영 카메라/코덱, 희망 톤앤매너 등을 적어주시면 빠른 견적에 도움이 됩니다."
+          placeholder="Timeline, runtime, camera/codec, and the look you're after — anything that helps me scope a quote."
         />
       </div>
 
@@ -151,7 +151,7 @@ ${form.message}`;
         disabled={status === "sending"}
         className="group inline-flex items-center gap-2 rounded-sm bg-bone px-7 py-3.5 text-sm font-medium text-ink transition hover:bg-accent-warm disabled:opacity-60"
       >
-        {status === "sending" ? "전송 중…" : "문의 보내기"}
+        {status === "sending" ? "Sending…" : "Send Message"}
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition group-hover:translate-x-0.5">
           <path d="M5 12h14M13 6l6 6-6 6" />
         </svg>

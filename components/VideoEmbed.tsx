@@ -27,7 +27,7 @@ export default function VideoEmbed({
         <button
           onClick={() => setActive(true)}
           className="group absolute inset-0 h-full w-full"
-          aria-label={`${title} 재생`}
+          aria-label={`Play ${title}`}
         >
           <YouTubeThumb
             id={youtubeId}

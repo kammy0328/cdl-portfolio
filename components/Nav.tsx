@@ -6,9 +6,8 @@ import { useEffect, useState } from "react";
 import { site } from "@/lib/site";
 
 const links = [
-  { href: "/#work", label: "Work" },
+  { href: "/", label: "Work" },
   { href: "/gallery", label: "Gallery" },
-  { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -27,10 +26,10 @@ export default function Nav() {
   // 라우트 변경 시 모바일 메뉴 닫기
   useEffect(() => setOpen(false), [pathname]);
 
-  const isActive = (href: string) =>
-    href.startsWith("/#")
-      ? pathname === "/"
-      : pathname === href || pathname.startsWith(href + "/");
+  const isActive = (href: string) => {
+    if (href === "/") return pathname === "/" || pathname.startsWith("/work");
+    return pathname === href || pathname.startsWith(href + "/");
+  };
 
   return (
     <header
@@ -44,7 +43,7 @@ export default function Nav() {
         <Link
           href="/"
           className="text-lg font-bold tracking-[0.3em] text-bone transition hover:text-accent-warm"
-          aria-label="CDL 홈"
+          aria-label="CDL home"
         >
           {site.name}
         </Link>
@@ -69,7 +68,7 @@ export default function Nav() {
         <button
           onClick={() => setOpen((v) => !v)}
           className="flex h-10 w-10 items-center justify-center text-bone md:hidden"
-          aria-label="메뉴"
+          aria-label="Menu"
           aria-expanded={open}
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">

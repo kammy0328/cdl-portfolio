@@ -16,18 +16,13 @@ export default function Footer() {
           <div className="label mb-4">Menu</div>
           <ul className="space-y-2 text-sm text-bone-dim">
             <li>
-              <Link href="/#work" className="link-underline hover:text-bone">
+              <Link href="/" className="link-underline hover:text-bone">
                 Work
               </Link>
             </li>
             <li>
               <Link href="/gallery" className="link-underline hover:text-bone">
                 Gallery
-              </Link>
-            </li>
-            <li>
-              <Link href="/about" className="link-underline hover:text-bone">
-                About
               </Link>
             </li>
             <li>

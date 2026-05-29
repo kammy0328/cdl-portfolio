@@ -14,11 +14,7 @@ export default function StillsGallery({
   const [idx, setIdx] = useState<number | null>(null);
 
   if (!stills.length) {
-    return (
-      <p className="text-sm text-bone-faint">
-        색보정 스틸이 곧 업데이트됩니다.
-      </p>
-    );
+    return <p className="text-sm text-bone-faint">Stills coming soon.</p>;
   }
 
   const images: LightboxImage[] = stills.map((s, i) => ({
@@ -34,7 +30,7 @@ export default function StillsGallery({
             key={s + i}
             onClick={() => setIdx(i)}
             className="group relative aspect-video overflow-hidden rounded-sm bg-ink-soft ring-1 ring-ink-line"
-            aria-label={`스틸 ${i + 1} 크게 보기`}
+            aria-label={`View still ${i + 1}`}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img

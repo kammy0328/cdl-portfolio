@@ -56,9 +56,7 @@ export default function GalleryGrid({ stills }: { stills: GalleryStill[] }) {
 
   if (!stills.length) {
     return (
-      <p className="wrap text-sm text-bone-faint">
-        색보정 스틸이 곧 업데이트됩니다.
-      </p>
+      <p className="wrap text-sm text-bone-faint">Stills coming soon.</p>
     );
   }
 
@@ -88,6 +86,7 @@ export default function GalleryGrid({ stills }: { stills: GalleryStill[] }) {
   const images: LightboxImage[] = items.map((s) => ({
     src: s.src,
     caption: `${s.workTitle} · ${s.artist}`,
+    href: `/work/${s.workSlug}`,
   }));
 
   return (
@@ -106,7 +105,7 @@ export default function GalleryGrid({ stills }: { stills: GalleryStill[] }) {
                   onClick={() => setIdx(cell.idx)}
                   className="group relative shrink-0 overflow-hidden bg-ink-soft"
                   style={{ width: cell.w, height: row.h }}
-                  aria-label={`${cell.still.workTitle} 스틸 크게 보기`}
+                  aria-label={`View still — ${cell.still.workTitle}`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img

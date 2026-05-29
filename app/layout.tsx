@@ -21,13 +21,12 @@ export const metadata: Metadata = {
   },
   description: site.description,
   keywords: [
-    "색보정",
-    "컬러리스트",
-    "컬러그레이딩",
     "color grading",
     "colorist",
-    "뮤직비디오 색보정",
-    "원격 색보정",
+    "remote colorist",
+    "music video color grading",
+    "color grade",
+    "DI",
     "CDL",
   ],
   openGraph: {
@@ -52,7 +51,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ko" className={mono.variable}>
+    <html lang="en" className={mono.variable}>
       <body className="min-h-screen overflow-x-hidden">
         <Nav />
         <main>{children}</main>

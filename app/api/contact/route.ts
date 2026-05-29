@@ -15,7 +15,7 @@ export async function POST(req: Request) {
 
     if (!name || !email || !message) {
       return NextResponse.json(
-        { ok: false, error: "필수 항목이 비어 있습니다." },
+        { ok: false, error: "Required fields are missing." },
         { status: 400 }
       );
     }
@@ -29,18 +29,18 @@ export async function POST(req: Request) {
     const { Resend } = await import("resend");
     const resend = new Resend(apiKey);
 
-    const text = `이름: ${name}
-이메일: ${email}
-프로젝트 유형: ${type ?? "-"}
+    const text = `Name: ${name}
+Email: ${email}
+Project type: ${type ?? "-"}
 
 ${message}`;
 
     const html = `
       <div style="font-family:system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.7;color:#111">
-        <h2 style="margin:0 0 16px">새 문의가 도착했습니다</h2>
-        <p><strong>이름</strong> : ${escapeHtml(name)}</p>
-        <p><strong>이메일</strong> : ${escapeHtml(email)}</p>
-        <p><strong>프로젝트 유형</strong> : ${escapeHtml(type ?? "-")}</p>
+        <h2 style="margin:0 0 16px">New inquiry</h2>
+        <p><strong>Name</strong> : ${escapeHtml(name)}</p>
+        <p><strong>Email</strong> : ${escapeHtml(email)}</p>
+        <p><strong>Project type</strong> : ${escapeHtml(type ?? "-")}</p>
         <hr style="border:none;border-top:1px solid #eee;margin:16px 0" />
         <p style="white-space:pre-wrap">${escapeHtml(message)}</p>
       </div>`;
@@ -50,7 +50,7 @@ ${message}`;
       from: "CDL Portfolio <onboarding@resend.dev>",
       to: [site.email],
       replyTo: email,
-      subject: `[CDL 문의] ${name} · ${type ?? ""}`,
+      subject: `[CDL Inquiry] ${name} · ${type ?? ""}`,
       text,
       html,
     });

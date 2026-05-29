@@ -44,7 +44,7 @@ export const works: Work[] = [
   {
     slug: "zerobaseone-love-aint-easy",
     title: "Love Ain't Easy",
-    artist: "ZEROBASEONE 제로베이스원 석매튜",
+    artist: "ZEROBASEONE · Seok Matthew",
     category: "Music Video",
     youtubeId: "nZS9J20OWog",
     publishedAt: "2026-05-28",
@@ -64,7 +64,7 @@ export const works: Work[] = [
   {
     slug: "memi-badidea",
     title: "BADidea",
-    artist: "MEMI 매미",
+    artist: "MEMI",
     category: "Music Video",
     youtubeId: "i_-pZiZJ7MQ",
     publishedAt: "2026-04-29",

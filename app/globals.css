@@ -12,6 +12,8 @@
 
   html {
     scroll-behavior: smooth;
+    /* 스크롤바 유무로 인한 레이아웃 이동(튐) 방지 — 항상 거터 예약 */
+    scrollbar-gutter: stable;
   }
 
   /* 모션 최소화 선호 사용자 존중 (접근성) */
