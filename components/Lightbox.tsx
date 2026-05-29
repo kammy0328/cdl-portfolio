@@ -114,39 +114,9 @@ export default function Lightbox({
         </svg>
       </button>
 
-      {images.length > 1 && (
-        <>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              go(-1);
-            }}
-            aria-label="Previous"
-            className="absolute left-3 sm:left-6 z-10 flex h-12 w-12 items-center justify-center rounded-full text-bone-dim transition hover:bg-white/10 hover:text-bone"
-          >
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="m15 18-6-6 6-6" />
-            </svg>
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              go(1);
-            }}
-            aria-label="Next"
-            className="absolute right-3 sm:right-6 z-10 flex h-12 w-12 items-center justify-center rounded-full text-bone-dim transition hover:bg-white/10 hover:text-bone"
-          >
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="m9 18 6-6-6-6" />
-            </svg>
-          </button>
-        </>
-      )}
-
-      {/* 이미지 — index가 바뀔 때마다 부드럽게 팝업 (key로 애니메이션 재생) */}
-      <figure key={index} className="mx-auto flex flex-col items-center animate-pop">
-        {/* 고정 크기 영역 + object-contain → 해상도/비율이 달라도 균일한 사이즈감 */}
-        <div className="flex h-[74vh] w-[90vw] items-center justify-center">
+      {/* 이미지 — 고정 크기 영역 + object-contain → 해상도/비율 달라도 균일한 사이즈감 */}
+      <figure className="mx-auto flex flex-col items-center">
+        <div className="relative flex h-[74vh] w-[90vw] items-center justify-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={current.src}
@@ -154,6 +124,35 @@ export default function Lightbox({
             onClick={(e) => e.stopPropagation()}
             className="h-full w-full object-contain"
           />
+          {/* 데스크탑 화살표 — 이미지 영역 세로 중앙, 모바일에선 숨김(스와이프 사용) */}
+          {images.length > 1 && (
+            <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  go(-1);
+                }}
+                aria-label="Previous"
+                className="absolute left-2 top-1/2 z-10 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full text-bone-dim transition hover:bg-white/10 hover:text-bone md:flex"
+              >
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="m15 18-6-6 6-6" />
+                </svg>
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  go(1);
+                }}
+                aria-label="Next"
+                className="absolute right-2 top-1/2 z-10 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full text-bone-dim transition hover:bg-white/10 hover:text-bone md:flex"
+              >
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="m9 18 6-6-6-6" />
+                </svg>
+              </button>
+            </>
+          )}
         </div>
         <figcaption className="mt-5 flex flex-col items-center gap-3 text-center">
           {current.caption && (
@@ -170,6 +169,9 @@ export default function Lightbox({
                 <path d="M5 12h14M13 6l6 6-6 6" />
               </svg>
             </Link>
+          )}
+          {images.length > 1 && (
+            <span className="label md:hidden">← 좌우로 밀어 넘기기 →</span>
           )}
         </figcaption>
       </figure>
