@@ -105,15 +105,15 @@ export default async function WorkPage({
             <div className="rounded-sm border border-ink-line bg-ink-card p-6">
               <dl className="space-y-4">
                 <div>
-                  <dt className="label">Artist</dt>
+                  <dt className="label">아티스트</dt>
                   <dd className="mt-1 text-sm text-bone">{work.artist}</dd>
                 </div>
                 <div>
-                  <dt className="label">Category</dt>
+                  <dt className="label">카테고리</dt>
                   <dd className="mt-1 text-sm text-bone">{work.category}</dd>
                 </div>
                 <div>
-                  <dt className="label">Released</dt>
+                  <dt className="label">릴리즈</dt>
                   <dd className="mt-1 text-sm text-bone">
                     {formatDate(work.publishedAt)}
                   </dd>

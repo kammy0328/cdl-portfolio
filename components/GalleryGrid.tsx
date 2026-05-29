@@ -103,7 +103,7 @@ export default function GalleryGrid({ stills }: { stills: GalleryStill[] }) {
                 <button
                   key={cell.still.src + cell.idx}
                   onClick={() => setIdx(cell.idx)}
-                  className="group relative shrink-0 overflow-hidden bg-ink-soft"
+                  className="relative shrink-0 overflow-hidden bg-ink-soft"
                   style={{ width: cell.w, height: row.h }}
                   aria-label={`View still — ${cell.still.workTitle}`}
                 >
@@ -112,17 +112,8 @@ export default function GalleryGrid({ stills }: { stills: GalleryStill[] }) {
                     src={cell.still.src}
                     alt={cell.still.workTitle}
                     loading="lazy"
-                    className="h-full w-full object-cover transition duration-700 ease-out group-hover:scale-[1.04]"
+                    className="h-full w-full object-cover"
                   />
-                  <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/0 to-transparent opacity-0 transition duration-300 group-hover:opacity-100" />
-                  <span className="pointer-events-none absolute bottom-0 left-0 right-0 flex items-end justify-between p-3 opacity-0 transition duration-300 group-hover:opacity-100">
-                    <span className="text-xs font-medium text-bone">
-                      {cell.still.workTitle}
-                    </span>
-                    <span className="label !text-bone-dim">
-                      {String(cell.idx + 1).padStart(2, "0")}
-                    </span>
-                  </span>
                 </button>
               ))}
             </div>

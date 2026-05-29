@@ -5,7 +5,7 @@ import { site } from "@/lib/site";
 
 type Status = "idle" | "sending" | "success" | "fallback";
 
-const projectTypes = ["Music Video", "Commercial", "Film", "Other"];
+const projectTypes = ["뮤직비디오", "광고", "필름", "기타"];
 
 export default function ContactForm() {
   const [status, setStatus] = useState<Status>("idle");
@@ -22,10 +22,10 @@ export default function ContactForm() {
   ) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
   const mailtoHref = () => {
-    const subject = `[CDL Inquiry] ${form.name || ""} · ${form.type}`;
-    const body = `Name: ${form.name}
-Email: ${form.email}
-Project type: ${form.type}
+    const subject = `[CDL 문의] ${form.name || ""} · ${form.type}`;
+    const body = `이름: ${form.name}
+이메일: ${form.email}
+프로젝트 유형: ${form.type}
 
 ${form.message}`;
     return `mailto:${site.email}?subject=${encodeURIComponent(
@@ -47,7 +47,6 @@ ${form.message}`;
         setStatus("success");
         return;
       }
-      // 서버 전송이 아직 설정되지 않았거나 실패 → 메일 앱으로 폴백
       window.location.href = mailtoHref();
       setStatus("fallback");
     } catch {
@@ -58,15 +57,10 @@ ${form.message}`;
 
   if (status === "success") {
     return (
-      <div className="rounded-sm border border-ink-line bg-ink-card p-8 text-center animate-fade-up">
-        <div className="text-accent-cool">
-          <svg className="mx-auto" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M20 6 9 17l-5-5" />
-          </svg>
-        </div>
-        <h3 className="mt-4 text-lg font-medium">Message sent.</h3>
+      <div className="rounded-sm border border-ink-line bg-ink-card p-8 animate-fade-up">
+        <h3 className="text-lg font-medium">문의가 전송되었습니다.</h3>
         <p className="mt-2 text-sm text-bone-dim">
-          Thanks — I&apos;ll get back to you at {site.email} shortly.
+          빠른 시일 내에 답변드리겠습니다.
         </p>
       </div>
     );
@@ -77,7 +71,7 @@ ${form.message}`;
 
   return (
     <form onSubmit={onSubmit} className="space-y-5">
-      {/* 허니팟: 스크린리더/사용자에겐 숨김, 봇 탐지용 */}
+      {/* 허니팟: 사용자에겐 숨김, 봇 탐지용 */}
       <input
         type="text"
         name="website"
@@ -91,27 +85,27 @@ ${form.message}`;
 
       {status === "fallback" && (
         <p className="rounded-sm border border-accent-warm/30 bg-accent-warm/5 px-4 py-3 text-sm text-bone-dim">
-          If your mail app didn&apos;t open,{" "}
+          메일 앱이 열리지 않았다면{" "}
           <a href={mailtoHref()} className="text-accent-warm underline">
-            click here
+            여기를 눌러
           </a>{" "}
-          to email {site.email}.
+          {site.email} 로 보내주세요.
         </p>
       )}
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
-          <label className="label mb-2 block">Name *</label>
+          <label className="label mb-2 block">이름</label>
           <input
             required
             value={form.name}
             onChange={update("name")}
             className={field}
-            placeholder="Your name or company"
+            placeholder="성함 또는 회사명"
           />
         </div>
         <div>
-          <label className="label mb-2 block">Email *</label>
+          <label className="label mb-2 block">이메일</label>
           <input
             required
             type="email"
@@ -124,7 +118,7 @@ ${form.message}`;
       </div>
 
       <div>
-        <label className="label mb-2 block">Project Type</label>
+        <label className="label mb-2 block">프로젝트 유형</label>
         <select value={form.type} onChange={update("type")} className={field}>
           {projectTypes.map((t) => (
             <option key={t} value={t} className="bg-ink-soft">
@@ -135,26 +129,23 @@ ${form.message}`;
       </div>
 
       <div>
-        <label className="label mb-2 block">Message *</label>
+        <label className="label mb-2 block">내용</label>
         <textarea
           required
           value={form.message}
           onChange={update("message")}
           rows={6}
           className={`${field} resize-none`}
-          placeholder="Timeline, runtime, camera/codec, and the look you're after — anything that helps me scope a quote."
+          placeholder="작업 일정, 분량, 카메라/코덱, 원하는 톤 등을 적어주세요."
         />
       </div>
 
       <button
         type="submit"
         disabled={status === "sending"}
-        className="group inline-flex items-center gap-2 rounded-sm bg-bone px-7 py-3.5 text-sm font-medium text-ink transition hover:bg-accent-warm disabled:opacity-60"
+        className="inline-flex items-center gap-2 rounded-sm bg-bone px-7 py-3.5 text-sm font-medium text-ink transition hover:bg-accent-warm disabled:opacity-60"
       >
-        {status === "sending" ? "Sending…" : "Send Message"}
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition group-hover:translate-x-0.5">
-          <path d="M5 12h14M13 6l6 6-6 6" />
-        </svg>
+        {status === "sending" ? "전송 중…" : "보내기"}
       </button>
     </form>
   );

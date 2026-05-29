@@ -58,10 +58,6 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="wrap flex flex-col items-center justify-between gap-2 border-t border-ink-line py-6 sm:flex-row">
-        <span className="label">© {site.name} · Color Grading</span>
-        <span className="label">Remote Colorist · Korea</span>
-      </div>
     </footer>
   );
 }
