@@ -18,6 +18,14 @@ export default function Reveal({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+
+    // 마운트 시점에 이미 뷰포트 안이면 즉시 표시 (상단 콘텐츠 깜빡임 방지)
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      setShown(true);
+      return;
+    }
+
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -28,7 +36,14 @@ export default function Reveal({
       { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
     );
     io.observe(el);
-    return () => io.disconnect();
+
+    // 안전장치: IO가 동작하지 않아도 콘텐츠가 끝내 보이도록 보장
+    const fallback = setTimeout(() => setShown(true), 1000);
+
+    return () => {
+      io.disconnect();
+      clearTimeout(fallback);
+    };
   }, []);
 
   return (
