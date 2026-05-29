@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 export interface LightboxImage {
   src: string;
@@ -34,6 +34,44 @@ export default function Lightbox({
     [index, images.length, onIndexChange]
   );
 
+  // 모바일 스와이프 — 좌우로 밀면 이전/다음 이미지, 배경 탭은 닫기
+  const startRef = useRef<{ x: number; y: number } | null>(null);
+  const swipedRef = useRef(false);
+  const onTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    startRef.current = { x: t.clientX, y: t.clientY };
+    swipedRef.current = false;
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    const s = startRef.current;
+    if (!s) return;
+    const t = e.touches[0];
+    if (
+      Math.abs(t.clientX - s.x) > 10 &&
+      Math.abs(t.clientX - s.x) > Math.abs(t.clientY - s.y)
+    ) {
+      swipedRef.current = true; // 가로 스와이프 진행 중
+    }
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    const s = startRef.current;
+    startRef.current = null;
+    if (!s) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - s.x;
+    const dy = t.clientY - s.y;
+    if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) {
+      go(dx > 0 ? -1 : 1); // 오른쪽으로 밀면 이전, 왼쪽이면 다음
+    }
+  };
+  const onBackdropClick = () => {
+    if (swipedRef.current) {
+      swipedRef.current = false;
+      return; // 스와이프 직후의 클릭은 무시 (닫기 방지)
+    }
+    onClose();
+  };
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -57,7 +95,11 @@ export default function Lightbox({
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md animate-fade-in"
-      onClick={onClose}
+      style={{ touchAction: "none" }}
+      onClick={onBackdropClick}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
       role="dialog"
       aria-modal="true"
     >
@@ -102,17 +144,14 @@ export default function Lightbox({
       )}
 
       {/* 이미지 — index가 바뀔 때마다 부드럽게 팝업 (key로 애니메이션 재생) */}
-      <figure
-        key={index}
-        className="mx-auto flex flex-col items-center animate-pop"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <figure key={index} className="mx-auto flex flex-col items-center animate-pop">
         {/* 고정 크기 영역 + object-contain → 해상도/비율이 달라도 균일한 사이즈감 */}
         <div className="flex h-[74vh] w-[90vw] items-center justify-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={current.src}
             alt={current.caption ?? ""}
+            onClick={(e) => e.stopPropagation()}
             className="h-full w-full object-contain"
           />
         </div>

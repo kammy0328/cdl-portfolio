@@ -9,6 +9,7 @@ const projectTypes = ["뮤직비디오", "광고", "필름", "기타"];
 
 export default function ContactForm() {
   const [status, setStatus] = useState<Status>("idle");
+  const [warned, setWarned] = useState(false);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -70,7 +71,17 @@ ${form.message}`;
     "w-full rounded-sm border border-ink-line bg-ink-soft px-4 py-3 text-bone placeholder:text-bone-faint outline-none transition focus:border-accent-warm/60 focus:ring-1 focus:ring-accent-warm/30";
 
   return (
-    <form onSubmit={onSubmit} className="space-y-5">
+    <form onSubmit={onSubmit} onFocusCapture={() => setWarned(true)} className="space-y-5">
+      {warned && status !== "fallback" && (
+        <p className="rounded-sm border border-accent-warm/40 bg-accent-warm/10 px-4 py-3 text-sm text-bone">
+          이 문의 폼은 아직 이메일과 연동되어 있지 않아요.{" "}
+          <a href={`mailto:${site.email}`} className="font-medium text-accent-warm underline">
+            {site.email}
+          </a>{" "}
+          로 직접 보내주시면 가장 빠릅니다.
+        </p>
+      )}
+
       {status === "fallback" && (
         <p className="rounded-sm border border-accent-warm/30 bg-accent-warm/5 px-4 py-3 text-sm text-bone-dim">
           메일 앱이 열리지 않았다면{" "}

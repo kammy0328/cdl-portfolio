@@ -53,11 +53,7 @@ export default async function WorkPage({
 
         {/* 헤더 */}
         <header className="mt-6 border-b border-ink-line pb-10">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-            <span className="label !text-accent-warm">{work.category}</span>
-            <span className="label">{formatDate(work.publishedAt)}</span>
-          </div>
-          <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">
+          <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
             {work.title}
           </h1>
           <p className="mt-3 text-lg text-bone-dim">{displayArtist(work)}</p>
@@ -102,15 +98,15 @@ export default async function WorkPage({
             <div className="rounded-sm border border-ink-line bg-ink-card p-6">
               <dl className="space-y-4">
                 <div>
-                  <dt className="label">아티스트</dt>
+                  <dt className="label">Artist</dt>
                   <dd className="mt-1 text-sm text-bone">{displayArtist(work)}</dd>
                 </div>
                 <div>
-                  <dt className="label">카테고리</dt>
+                  <dt className="label">Category</dt>
                   <dd className="mt-1 text-sm text-bone">{work.category}</dd>
                 </div>
                 <div>
-                  <dt className="label">릴리즈</dt>
+                  <dt className="label">Released</dt>
                   <dd className="mt-1 text-sm text-bone">
                     {formatDate(work.publishedAt)}
                   </dd>
