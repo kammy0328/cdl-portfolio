@@ -104,15 +104,18 @@ export default function Lightbox({
       {/* 이미지 — index가 바뀔 때마다 부드럽게 팝업 (key로 애니메이션 재생) */}
       <figure
         key={index}
-        className="mx-auto flex max-h-[90vh] max-w-[92vw] flex-col items-center animate-pop"
+        className="mx-auto flex flex-col items-center animate-pop"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={current.src}
-          alt={current.caption ?? ""}
-          className="max-h-[76vh] max-w-[92vw] object-contain shadow-2xl"
-        />
+        {/* 고정 크기 영역 + object-contain → 해상도/비율이 달라도 균일한 사이즈감 */}
+        <div className="flex h-[74vh] w-[90vw] items-center justify-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={current.src}
+            alt={current.caption ?? ""}
+            className="h-full w-full object-contain"
+          />
+        </div>
         <figcaption className="mt-5 flex flex-col items-center gap-3 text-center">
           {current.caption && (
             <span className="text-sm text-bone-dim">{current.caption}</span>

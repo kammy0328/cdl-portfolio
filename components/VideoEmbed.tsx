@@ -26,16 +26,16 @@ export default function VideoEmbed({
       ) : (
         <button
           onClick={() => setActive(true)}
-          className="group absolute inset-0 h-full w-full"
+          className="absolute inset-0 h-full w-full"
           aria-label={`Play ${title}`}
         >
           <YouTubeThumb
             id={youtubeId}
             alt={title}
-            className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
+            className="h-full w-full object-cover"
           />
-          <span className="absolute inset-0 bg-black/25 transition group-hover:bg-black/10" />
-          <span className="absolute left-1/2 top-1/2 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 ring-1 ring-white/30 backdrop-blur-sm transition duration-300 group-hover:scale-110 group-hover:bg-black/70">
+          <span className="absolute inset-0 bg-black/25" />
+          <span className="absolute left-1/2 top-1/2 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 ring-1 ring-white/30 backdrop-blur-sm">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" className="ml-1 text-bone">
               <path d="M8 5v14l11-7z" />
             </svg>

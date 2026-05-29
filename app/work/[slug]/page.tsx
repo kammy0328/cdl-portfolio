@@ -114,14 +114,6 @@ export default async function WorkPage({
                   </dd>
                 </div>
               </dl>
-              <a
-                href={`https://youtu.be/${work.youtubeId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="link-underline mt-6 inline-block text-sm font-medium text-accent-warm"
-              >
-                Watch on YouTube →
-              </a>
             </div>
           </aside>
         </div>
