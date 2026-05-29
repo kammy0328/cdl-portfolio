@@ -16,7 +16,8 @@ export const getWorks = cache(async (): Promise<Work[]> => {
     const { blobs } = await list({ prefix: WORKS_BLOB_PATH, limit: 10, token });
     const found = blobs.find((b) => b.pathname === WORKS_BLOB_PATH);
     if (!found) return seedWorks;
-    const res = await fetch(found.url, { cache: "no-store" });
+    // CDN 캐시 우회 — works.json은 자주 바뀌므로 항상 최신본을 읽음
+    const res = await fetch(`${found.url}?t=${Date.now()}`, { cache: "no-store" });
     if (!res.ok) return seedWorks;
     const data = (await res.json()) as Work[];
     return Array.isArray(data) && data.length >= 0 ? data : seedWorks;

@@ -48,6 +48,7 @@ const blob = await put("works.json", JSON.stringify(works, null, 2), {
   contentType: "application/json",
   addRandomSuffix: false,
   allowOverwrite: true,
+  cacheControlMaxAge: 0,
   token,
 });
 console.log("seeded works.json ->", blob.url);
