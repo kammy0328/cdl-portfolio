@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { compressImage, parseYouTubeId } from "@/lib/compress";
+import YouTubeThumb from "@/components/YouTubeThumb";
 import type { Work } from "@/data/works";
 
 type Phase = "loading" | "needconfig" | "login" | "ready";
@@ -30,6 +31,19 @@ function slugify(s: string): string {
     .slice(0, 60);
 }
 
+function reorder<T>(arr: T[], from: number, to: number): T[] {
+  const a = [...arr];
+  const [x] = a.splice(from, 1);
+  a.splice(to, 0, x);
+  return a;
+}
+
+/** 정렬용 시각 — 날짜 없으면 맨 위로 */
+const ytTime = (d: string) => {
+  const t = new Date(d).getTime();
+  return Number.isNaN(t) ? Infinity : t;
+};
+
 const fieldCls =
   "w-full rounded-sm border border-ink-line bg-ink-soft px-3 py-2 text-sm text-bone placeholder:text-bone-faint outline-none transition focus:border-accent-warm/60";
 
@@ -38,6 +52,7 @@ export default function Admin() {
   const [password, setPassword] = useState("");
   const [loginErr, setLoginErr] = useState("");
   const [works, setWorks] = useState<Work[]>([]);
+  const [editing, setEditing] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(0);
   const [msg, setMsg] = useState("");
@@ -84,24 +99,23 @@ export default function Admin() {
   async function logout() {
     await fetch("/api/admin/logout", { method: "POST" });
     setWorks([]);
+    setEditing(null);
     setPhase("login");
   }
 
-  // ---- works helpers ----
   const update = (i: number, patch: Partial<Work>) =>
     setWorks((ws) => ws.map((w, idx) => (idx === i ? { ...w, ...patch } : w)));
-  const addWork = () => setWorks((ws) => [blankWork(), ...ws]);
-  const removeWork = (i: number) =>
-    confirm("이 작업을 삭제할까요?") &&
+
+  function addWork() {
+    setWorks((ws) => [blankWork(), ...ws]);
+    setEditing(0);
+  }
+
+  function removeWork(i: number) {
+    if (!confirm("이 작업을 삭제할까요?")) return;
     setWorks((ws) => ws.filter((_, idx) => idx !== i));
-  const move = (i: number, dir: -1 | 1) =>
-    setWorks((ws) => {
-      const j = i + dir;
-      if (j < 0 || j >= ws.length) return ws;
-      const copy = [...ws];
-      [copy[i], copy[j]] = [copy[j], copy[i]];
-      return copy;
-    });
+    setEditing(null);
+  }
 
   async function fetchYt(i: number, raw: string) {
     const id = parseYouTubeId(raw);
@@ -109,11 +123,12 @@ export default function Admin() {
     if (id.length < 5) return;
     const r = await fetch(`/api/admin/youtube?id=${encodeURIComponent(id)}`).then((r) => r.json());
     if (r.ok) {
+      const w = works[i];
       update(i, {
-        title: works[i].title || r.title || "",
-        artist: works[i].artist || r.artist || "",
-        publishedAt: works[i].publishedAt || r.publishedAt || "",
-        slug: works[i].slug || slugify(r.title || ""),
+        title: w.title || r.title || "",
+        artist: w.artist || r.artist || "",
+        publishedAt: w.publishedAt || r.publishedAt || "",
+        slug: w.slug || slugify(r.title || ""),
       });
     }
   }
@@ -138,7 +153,7 @@ export default function Admin() {
           );
         }
       } catch {
-        /* skip failed file */
+        /* skip */
       } finally {
         setUploading((n) => n - 1);
       }
@@ -161,10 +176,10 @@ export default function Admin() {
     setSaving(false);
     if (r.ok) {
       setWorks(prepared);
-      setMsg("저장되었습니다. 사이트에 반영됩니다.");
+      setMsg("저장되었습니다.");
       setTimeout(() => setMsg(""), 4000);
     } else {
-      setMsg("저장에 실패했습니다.");
+      setMsg("저장 실패");
     }
   }
 
@@ -198,32 +213,37 @@ export default function Admin() {
             autoFocus
           />
           {loginErr && <p className="mt-2 text-sm text-red-400">{loginErr}</p>}
-          <button
-            type="submit"
-            className="mt-4 w-full rounded-sm bg-bone py-3 text-sm font-medium text-ink transition hover:bg-accent-warm"
-          >
+          <button type="submit" className="mt-4 w-full rounded-sm bg-bone py-3 text-sm font-medium text-ink transition hover:bg-accent-warm">
             로그인
           </button>
         </form>
       </div>
     );
 
-  // ready
+  const editingWork = editing !== null ? works[editing] : null;
+  const ordered = works
+    .map((w, i) => ({ w, i }))
+    .sort((a, b) => ytTime(b.w.publishedAt) - ytTime(a.w.publishedAt));
+
   return (
     <div className="wrap pt-24 pb-32">
-      <div className="sticky top-16 z-30 -mx-5 mb-8 flex items-center justify-between border-b border-ink-line bg-ink/90 px-5 py-4 backdrop-blur-md sm:-mx-8 sm:px-8">
-        <h1 className="text-xl font-bold tracking-[0.2em]">ADMIN</h1>
-        <div className="flex items-center gap-3">
-          {uploading > 0 && (
-            <span className="label !text-accent-warm">업로드 중 {uploading}…</span>
-          )}
-          {msg && <span className="label !text-accent-cool">{msg}</span>}
-          <button
-            onClick={addWork}
-            className="rounded-sm border border-ink-line px-4 py-2 text-sm transition hover:bg-white/5"
-          >
-            + 작업 추가
+      {/* 헤더 */}
+      <div className="sticky top-16 z-30 -mx-5 mb-8 flex items-center justify-between gap-3 border-b border-ink-line bg-ink/90 px-5 py-4 backdrop-blur-md sm:-mx-8 sm:px-8">
+        {editing === null ? (
+          <h1 className="text-xl font-bold tracking-[0.2em]">ADMIN</h1>
+        ) : (
+          <button onClick={() => setEditing(null)} className="text-sm text-bone-dim transition hover:text-bone">
+            ← 작업 목록
           </button>
+        )}
+        <div className="flex items-center gap-3">
+          {uploading > 0 && <span className="label !text-accent-warm">업로드 중 {uploading}…</span>}
+          {msg && <span className="label !text-accent-cool">{msg}</span>}
+          {editing === null && (
+            <button onClick={addWork} className="rounded-sm border border-ink-line px-4 py-2 text-sm transition hover:bg-white/5">
+              + 작업 추가
+            </button>
+          )}
           <button
             onClick={save}
             disabled={saving || uploading > 0}
@@ -231,37 +251,58 @@ export default function Admin() {
           >
             {saving ? "저장 중…" : "저장"}
           </button>
-          <button
-            onClick={logout}
-            className="rounded-sm px-3 py-2 text-sm text-bone-dim transition hover:text-bone"
-          >
+          <button onClick={logout} className="rounded-sm px-3 py-2 text-sm text-bone-dim transition hover:text-bone">
             로그아웃
           </button>
         </div>
       </div>
 
-      {works.length === 0 && (
-        <p className="text-sm text-bone-dim">
-          작업이 없습니다. “+ 작업 추가”로 시작하세요.
-        </p>
-      )}
-
-      <div className="space-y-6">
-        {works.map((w, i) => (
-          <WorkEditor
-            key={i}
-            work={w}
-            index={i}
-            total={works.length}
-            uploading={uploading}
-            onChange={(patch) => update(i, patch)}
-            onRemove={() => removeWork(i)}
-            onMove={(dir) => move(i, dir)}
-            onFetchYt={(raw) => fetchYt(i, raw)}
-            onFiles={(list) => handleFiles(i, list)}
-          />
+      {/* 목록 (카드) */}
+      {editing === null &&
+        (works.length === 0 ? (
+          <p className="text-sm text-bone-dim">작업이 없습니다. “+ 작업 추가”로 시작하세요.</p>
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {ordered.map(({ w, i }) => (
+              <button
+                key={i}
+                onClick={() => setEditing(i)}
+                className="group block overflow-hidden rounded-sm border border-ink-line bg-ink-card text-left transition hover:border-bone-dim"
+              >
+                <div className="relative aspect-video bg-ink-soft">
+                  {w.youtubeId ? (
+                    <YouTubeThumb id={parseYouTubeId(w.youtubeId)} alt={w.title} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-xs text-bone-faint">유튜브 ID 필요</div>
+                  )}
+                  <span className="absolute right-2 top-2 rounded-sm bg-black/60 px-2 py-1 font-mono text-[10px] text-bone">
+                    스틸 {w.stills.length}
+                  </span>
+                </div>
+                <div className="p-4">
+                  <div className="font-medium text-bone">{w.title || "(제목 없음)"}</div>
+                  <div className="mt-0.5 text-sm text-bone-dim">{w.artist || "—"}</div>
+                  <div className="label mt-2">
+                    {w.category}
+                    {w.publishedAt ? ` · ${w.publishedAt}` : ""}
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
         ))}
-      </div>
+
+      {/* 편집 */}
+      {editingWork && editing !== null && (
+        <WorkEditor
+          work={editingWork}
+          uploading={uploading}
+          onChange={(patch) => update(editing, patch)}
+          onRemove={() => removeWork(editing)}
+          onFetchYt={(raw) => fetchYt(editing, raw)}
+          onFiles={(list) => handleFiles(editing, list)}
+        />
+      )}
     </div>
   );
 }
@@ -270,131 +311,103 @@ export default function Admin() {
 
 function WorkEditor({
   work,
-  index,
-  total,
   uploading,
   onChange,
   onRemove,
-  onMove,
   onFetchYt,
   onFiles,
 }: {
   work: Work;
-  index: number;
-  total: number;
   uploading: number;
   onChange: (patch: Partial<Work>) => void;
   onRemove: () => void;
-  onMove: (dir: -1 | 1) => void;
   onFetchYt: (raw: string) => void;
   onFiles: (list: FileList | null) => void;
 }) {
   const [drag, setDrag] = useState(false);
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [overIdx, setOverIdx] = useState<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const ytId = parseYouTubeId(work.youtubeId);
+
   return (
-    <div className="rounded-sm border border-ink-line bg-ink-card p-5">
-      <div className="mb-4 flex items-center justify-between">
-        <span className="label">#{index + 1}</span>
-        <div className="flex items-center gap-2">
-          <button onClick={() => onMove(-1)} disabled={index === 0} className="px-2 text-bone-dim hover:text-bone disabled:opacity-30" aria-label="위로">↑</button>
-          <button onClick={() => onMove(1)} disabled={index === total - 1} className="px-2 text-bone-dim hover:text-bone disabled:opacity-30" aria-label="아래로">↓</button>
-          <button onClick={onRemove} className="ml-2 text-sm text-red-400 hover:text-red-300">삭제</button>
+    <div className="rounded-sm border border-ink-line bg-ink-card p-5 sm:p-7">
+      <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
+        {/* 썸네일 (읽기 전용) */}
+        <div>
+          <span className="label">썸네일 (유튜브 자동 · 변경 불가)</span>
+          <div className="mt-2 aspect-video overflow-hidden rounded-sm bg-ink-soft ring-1 ring-ink-line">
+            {ytId ? (
+              <YouTubeThumb id={ytId} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex h-full items-center justify-center px-3 text-center text-xs text-bone-faint">
+                유튜브 ID를 입력하면 썸네일이 표시됩니다
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* 메타데이터 */}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="block sm:col-span-2">
+            <span className="label">유튜브 URL / ID</span>
+            <div className="mt-1 flex gap-2">
+              <input className={fieldCls} value={work.youtubeId} onChange={(e) => onChange({ youtubeId: e.target.value })} placeholder="youtu.be/XXXX 또는 ID" />
+              <button type="button" onClick={() => onFetchYt(work.youtubeId)} className="shrink-0 rounded-sm border border-ink-line px-3 text-xs text-bone-dim transition hover:bg-white/5 hover:text-bone">
+                불러오기
+              </button>
+            </div>
+          </label>
+          <label className="block">
+            <span className="label">제목</span>
+            <input className={`${fieldCls} mt-1`} value={work.title} onChange={(e) => onChange({ title: e.target.value })} />
+          </label>
+          <label className="block">
+            <span className="label">아티스트</span>
+            <input className={`${fieldCls} mt-1`} value={work.artist} onChange={(e) => onChange({ artist: e.target.value })} />
+          </label>
+          <label className="block">
+            <span className="label">카테고리</span>
+            <select className={`${fieldCls} mt-1`} value={work.category} onChange={(e) => onChange({ category: e.target.value })}>
+              {CATEGORIES.map((c) => (
+                <option key={c} value={c} className="bg-ink-soft">{c}</option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className="label">릴리즈 (업로드 날짜)</span>
+            <input type="date" className={`${fieldCls} mt-1`} value={work.publishedAt} onChange={(e) => onChange({ publishedAt: e.target.value })} />
+          </label>
+          <label className="block sm:col-span-2">
+            <span className="label">slug (URL, 비우면 자동)</span>
+            <input className={`${fieldCls} mt-1`} value={work.slug} onChange={(e) => onChange({ slug: e.target.value })} placeholder="artist-title" />
+          </label>
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label className="block">
-          <span className="label">유튜브 URL / ID</span>
-          <div className="mt-1 flex gap-2">
-            <input
-              className={fieldCls}
-              value={work.youtubeId}
-              onChange={(e) => onChange({ youtubeId: e.target.value })}
-              placeholder="youtu.be/XXXX 또는 ID"
-            />
-            <button
-              type="button"
-              onClick={() => onFetchYt(work.youtubeId)}
-              className="shrink-0 rounded-sm border border-ink-line px-3 text-xs text-bone-dim transition hover:bg-white/5 hover:text-bone"
-            >
-              불러오기
-            </button>
-          </div>
-        </label>
-        <label className="block">
-          <span className="label">제목</span>
-          <input className={`${fieldCls} mt-1`} value={work.title} onChange={(e) => onChange({ title: e.target.value })} />
-        </label>
-        <label className="block">
-          <span className="label">아티스트</span>
-          <input className={`${fieldCls} mt-1`} value={work.artist} onChange={(e) => onChange({ artist: e.target.value })} />
-        </label>
-        <label className="block">
-          <span className="label">카테고리</span>
-          <select className={`${fieldCls} mt-1`} value={work.category} onChange={(e) => onChange({ category: e.target.value })}>
-            {CATEGORIES.map((c) => (
-              <option key={c} value={c} className="bg-ink-soft">{c}</option>
-            ))}
-          </select>
-        </label>
-        <label className="block">
-          <span className="label">릴리즈 (업로드 날짜)</span>
-          <input type="date" className={`${fieldCls} mt-1`} value={work.publishedAt} onChange={(e) => onChange({ publishedAt: e.target.value })} />
-        </label>
-        <label className="block">
-          <span className="label">slug (URL, 비우면 자동)</span>
-          <input className={`${fieldCls} mt-1`} value={work.slug} onChange={(e) => onChange({ slug: e.target.value })} placeholder="artist-title" />
-        </label>
-      </div>
-
       {/* 크레딧 */}
-      <div className="mt-5">
+      <div className="mt-7">
         <div className="mb-2 flex items-center justify-between">
           <span className="label">크레딧</span>
-          <button
-            type="button"
-            onClick={() => onChange({ credits: [...work.credits, { role: "", name: "" }] })}
-            className="text-xs text-bone-dim hover:text-bone"
-          >
+          <button type="button" onClick={() => onChange({ credits: [...work.credits, { role: "", name: "" }] })} className="text-xs text-bone-dim hover:text-bone">
             + 크레딧 추가
           </button>
         </div>
         <div className="space-y-2">
           {work.credits.map((c, ci) => (
             <div key={ci} className="flex gap-2">
-              <input
-                className={`${fieldCls} max-w-[10rem]`}
-                placeholder="직무 (예: 감독)"
-                value={c.role}
-                onChange={(e) =>
-                  onChange({ credits: work.credits.map((x, k) => (k === ci ? { ...x, role: e.target.value } : x)) })
-                }
-              />
-              <input
-                className={fieldCls}
-                placeholder="이름"
-                value={c.name}
-                onChange={(e) =>
-                  onChange({ credits: work.credits.map((x, k) => (k === ci ? { ...x, name: e.target.value } : x)) })
-                }
-              />
-              <button
-                type="button"
-                onClick={() => onChange({ credits: work.credits.filter((_, k) => k !== ci) })}
-                className="shrink-0 px-2 text-bone-dim hover:text-red-400"
-                aria-label="크레딧 삭제"
-              >
-                ×
-              </button>
+              <input className={`${fieldCls} max-w-[10rem]`} placeholder="직무 (예: 감독)" value={c.role} onChange={(e) => onChange({ credits: work.credits.map((x, k) => (k === ci ? { ...x, role: e.target.value } : x)) })} />
+              <input className={fieldCls} placeholder="이름" value={c.name} onChange={(e) => onChange({ credits: work.credits.map((x, k) => (k === ci ? { ...x, name: e.target.value } : x)) })} />
+              <button type="button" onClick={() => onChange({ credits: work.credits.filter((_, k) => k !== ci) })} className="shrink-0 px-2 text-bone-dim hover:text-red-400" aria-label="크레딧 삭제">×</button>
             </div>
           ))}
         </div>
       </div>
 
-      {/* 스틸 드롭존 */}
-      <div className="mt-5">
-        <span className="label">색보정 스틸 (드래그 드롭 · 자동 압축)</span>
+      {/* 색보정 스틸 */}
+      <div className="mt-7">
+        <span className="label">색보정 스틸 (드래그 드롭으로 추가 · 썸네일을 드래그해 순서 변경)</span>
         <div
           onDragOver={(e) => {
             e.preventDefault();
@@ -411,26 +424,37 @@ function WorkEditor({
             drag ? "border-accent-warm bg-accent-warm/5 text-bone" : "border-ink-line text-bone-faint hover:border-bone-dim"
           }`}
         >
-          이미지를 여기로 드래그하거나 클릭해서 선택 (비율 무관)
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            multiple
-            hidden
-            onChange={(e) => {
-              onFiles(e.target.files);
-              e.target.value = "";
-            }}
-          />
+          이미지를 여기로 드래그하거나 클릭해서 선택 (비율 무관 · 자동 압축)
+          <input ref={fileRef} type="file" accept="image/*" multiple hidden onChange={(e) => { onFiles(e.target.files); e.target.value = ""; }} />
         </div>
 
         {work.stills.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-2">
             {work.stills.map((s, si) => (
-              <div key={s.src + si} className="relative h-20 overflow-hidden rounded-sm bg-ink-soft ring-1 ring-ink-line">
+              <div
+                key={s.src + si}
+                draggable
+                onDragStart={() => setDragIdx(si)}
+                onDragEnter={() => setOverIdx(si)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => {
+                  if (dragIdx !== null && dragIdx !== si) {
+                    onChange({ stills: reorder(work.stills, dragIdx, si) });
+                  }
+                  setDragIdx(null);
+                  setOverIdx(null);
+                }}
+                onDragEnd={() => {
+                  setDragIdx(null);
+                  setOverIdx(null);
+                }}
+                className={`relative h-24 cursor-grab overflow-hidden rounded-sm bg-ink-soft ring-1 transition active:cursor-grabbing ${
+                  overIdx === si && dragIdx !== si ? "ring-2 ring-accent-warm" : "ring-ink-line"
+                } ${dragIdx === si ? "opacity-40" : ""}`}
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={s.src} alt="" className="h-20 w-auto object-cover" />
+                <img src={s.src} alt="" className="pointer-events-none h-24 w-auto object-cover" />
+                <span className="absolute bottom-1 left-1 rounded-sm bg-black/60 px-1 font-mono text-[10px] text-bone">{si + 1}</span>
                 <button
                   type="button"
                   onClick={() => onChange({ stills: work.stills.filter((_, k) => k !== si) })}
@@ -443,6 +467,13 @@ function WorkEditor({
             ))}
           </div>
         )}
+      </div>
+
+      {/* 삭제 */}
+      <div className="mt-8 border-t border-ink-line pt-5">
+        <button type="button" onClick={onRemove} className="text-sm text-red-400 transition hover:text-red-300">
+          이 작업 삭제
+        </button>
       </div>
     </div>
   );
