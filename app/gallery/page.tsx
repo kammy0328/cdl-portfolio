@@ -11,16 +11,12 @@ export default function GalleryPage() {
   const stills = getAllStills();
 
   return (
-    <div className="wrap pt-28 sm:pt-32">
-      <header className="mb-12">
-        <p className="eyebrow">Gallery</p>
-        <h1 className="mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">
+    <div className="pt-28 sm:pt-32">
+      <header className="wrap mb-10 flex items-end justify-between">
+        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
           색보정 스틸
         </h1>
-        <p className="mt-4 max-w-xl text-base text-bone-dim">
-          지금까지 작업한 영상들의 색보정 스틸입니다. 방문할 때마다 무작위
-          순서로 보여집니다. 이미지를 누르면 크게 볼 수 있어요.
-        </p>
+        <span className="label hidden sm:block">{stills.length} Stills</span>
       </header>
 
       <GalleryGrid stills={stills} />

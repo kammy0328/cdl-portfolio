@@ -14,6 +14,7 @@ export default function ContactForm() {
     email: "",
     type: projectTypes[0],
     message: "",
+    website: "", // 허니팟 — 사람에겐 보이지 않음, 봇이 채우면 무시
   });
 
   const update = (k: keyof typeof form) => (
@@ -76,6 +77,18 @@ ${form.message}`;
 
   return (
     <form onSubmit={onSubmit} className="space-y-5">
+      {/* 허니팟: 스크린리더/사용자에겐 숨김, 봇 탐지용 */}
+      <input
+        type="text"
+        name="website"
+        value={form.website}
+        onChange={update("website")}
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }}
+      />
+
       {status === "fallback" && (
         <p className="rounded-sm border border-accent-warm/30 bg-accent-warm/5 px-4 py-3 text-sm text-bone-dim">
           메일 앱이 열리지 않았다면{" "}

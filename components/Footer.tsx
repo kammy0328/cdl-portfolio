@@ -9,9 +9,7 @@ export default function Footer() {
           <div className="text-lg font-bold tracking-[0.3em] text-bone">
             {site.name}
           </div>
-          <p className="mt-3 max-w-xs text-sm leading-relaxed text-bone-dim">
-            원격으로 작업하는 컬러리스트. 어디서 촬영하든, 색은 CDL이 완성합니다.
-          </p>
+          <p className="label mt-3">Colorist · Remote · Korea</p>
         </div>
 
         <div>

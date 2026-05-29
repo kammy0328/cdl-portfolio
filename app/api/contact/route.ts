@@ -6,7 +6,12 @@ import { site } from "@/lib/site";
 // 프론트엔드가 자동으로 메일 앱(mailto)으로 폴백합니다.
 export async function POST(req: Request) {
   try {
-    const { name, email, type, message } = await req.json();
+    const { name, email, type, message, website } = await req.json();
+
+    // 허니팟이 채워졌으면 봇 → 조용히 성공 응답하고 전송하지 않음
+    if (website) {
+      return NextResponse.json({ ok: true });
+    }
 
     if (!name || !email || !message) {
       return NextResponse.json(
