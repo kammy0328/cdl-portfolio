@@ -4,6 +4,11 @@ import { site } from "@/lib/site";
 // 문의 폼 → Resend 로 이메일 전송.
 // RESEND_API_KEY 환경변수가 설정되지 않았으면 ok:false, configured:false 를 반환하고
 // 프론트엔드가 자동으로 메일 앱(mailto)으로 폴백합니다.
+// 이메일(Resend) 연동 여부를 프론트엔드에 알려줌
+export async function GET() {
+  return NextResponse.json({ configured: !!process.env.RESEND_API_KEY });
+}
+
 export async function POST(req: Request) {
   try {
     const { name, email, type, message, website } = await req.json();

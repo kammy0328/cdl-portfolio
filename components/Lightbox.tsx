@@ -123,6 +123,7 @@ export default function Lightbox({
             alt={current.caption ?? ""}
             fill
             sizes="92vw"
+            quality={90}
             onClick={(e) => e.stopPropagation()}
             onContextMenu={(e) => e.preventDefault()}
             draggable={false}

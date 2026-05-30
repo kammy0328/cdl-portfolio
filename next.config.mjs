@@ -2,6 +2,7 @@
 const nextConfig = {
   // YouTube 썸네일을 외부에서 직접 불러오는 경우를 허용
   images: {
+    qualities: [75, 90],
     remotePatterns: [
       { protocol: "https", hostname: "i.ytimg.com" },
       { protocol: "https", hostname: "img.youtube.com" },

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { site } from "@/lib/site";
 
 type Status = "idle" | "sending" | "success" | "fallback";
@@ -10,6 +10,15 @@ const projectTypes = ["뮤직비디오", "광고", "필름", "기타"];
 export default function ContactForm() {
   const [status, setStatus] = useState<Status>("idle");
   const [warned, setWarned] = useState(false);
+  const [configured, setConfigured] = useState<boolean | null>(null);
+
+  // 이메일(Resend) 연동 여부 확인 — 연동돼 있으면 경고를 띄우지 않음
+  useEffect(() => {
+    fetch("/api/contact")
+      .then((r) => r.json())
+      .then((d) => setConfigured(!!d.configured))
+      .catch(() => setConfigured(false));
+  }, []);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -72,7 +81,7 @@ ${form.message}`;
 
   return (
     <form onSubmit={onSubmit} onFocusCapture={() => setWarned(true)} className="space-y-5">
-      {warned && status !== "fallback" && (
+      {warned && configured === false && status !== "fallback" && (
         <p className="rounded-sm border border-accent-warm/40 bg-accent-warm/10 px-4 py-3 text-sm text-bone">
           이 문의 폼은 아직 이메일과 연동되어 있지 않아요.{" "}
           <a href={`mailto:${site.email}`} className="font-medium text-accent-warm underline">
