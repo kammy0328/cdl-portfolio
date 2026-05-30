@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { put } from "@vercel/blob";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { isAuthed } from "@/lib/admin-auth";
-import { getWorks, WORKS_BLOB_PATH } from "@/lib/works";
+import { loadWorks, WORKS_BLOB_PATH } from "@/lib/works";
 
 export const runtime = "nodejs";
 
@@ -10,7 +10,7 @@ export async function GET() {
   if (!(await isAuthed())) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
-  return NextResponse.json({ ok: true, works: await getWorks() });
+  return NextResponse.json({ ok: true, works: await loadWorks() });
 }
 
 export async function POST(req: Request) {
@@ -38,8 +38,9 @@ export async function POST(req: Request) {
     token,
   });
 
-  // 사이트 페이지 캐시 갱신
+  // 데이터 캐시 무효화 + 페이지 갱신 → 저장 즉시 반영
   try {
+    revalidateTag("works");
     revalidatePath("/");
     revalidatePath("/gallery");
   } catch {

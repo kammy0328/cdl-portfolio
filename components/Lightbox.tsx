@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useCallback, useEffect, useRef } from "react";
 
 export interface LightboxImage {
@@ -117,12 +118,15 @@ export default function Lightbox({
       {/* 이미지 — 고정 크기 영역 + object-contain → 해상도/비율 달라도 균일한 사이즈감 */}
       <figure className="mx-auto flex flex-col items-center">
         <div className="relative flex h-[74vh] w-[90vw] items-center justify-center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={current.src}
             alt={current.caption ?? ""}
+            fill
+            sizes="92vw"
             onClick={(e) => e.stopPropagation()}
-            className="h-full w-full object-contain"
+            onContextMenu={(e) => e.preventDefault()}
+            draggable={false}
+            className="select-none object-contain"
           />
           {/* 데스크탑 화살표 — 이미지 영역 세로 중앙, 모바일에선 숨김(스와이프 사용) */}
           {images.length > 1 && (

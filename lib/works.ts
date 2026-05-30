@@ -1,22 +1,21 @@
-import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { list } from "@vercel/blob";
 import { works as seedWorks, type Work } from "@/data/works";
 
 export const WORKS_BLOB_PATH = "works.json";
 
 /**
- * 포트폴리오 데이터 로드 — Vercel Blob의 works.json을 우선 사용하고,
- * 없거나 오류가 나면 시드 데이터(data/works.ts)로 안전하게 대체합니다.
- * (cache로 같은 요청 내 중복 호출을 1회로 합칩니다)
+ * 포트폴리오 데이터 로드(항상 최신) — Vercel Blob의 works.json 우선,
+ * 없거나 오류 시 시드 데이터로 안전 대체. 관리자(어드민)는 이 함수를 직접 사용.
  */
-export const getWorks = cache(async (): Promise<Work[]> => {
+export async function loadWorks(): Promise<Work[]> {
   const token = process.env.BLOB_READ_WRITE_TOKEN;
   if (!token) return seedWorks;
   try {
     const { blobs } = await list({ prefix: WORKS_BLOB_PATH, limit: 10, token });
     const found = blobs.find((b) => b.pathname === WORKS_BLOB_PATH);
     if (!found) return seedWorks;
-    // CDN 캐시 우회 — works.json은 자주 바뀌므로 항상 최신본을 읽음
+    // CDN 캐시 우회 — works.json 최신본을 읽음 (재검증 시에만 호출)
     const res = await fetch(`${found.url}?t=${Date.now()}`, { cache: "no-store" });
     if (!res.ok) return seedWorks;
     const data = (await res.json()) as Work[];
@@ -29,6 +28,15 @@ export const getWorks = cache(async (): Promise<Work[]> => {
   } catch {
     return seedWorks;
   }
+}
+
+/**
+ * 공개 페이지용 — 60초 캐시. 관리자 저장 시 revalidateTag("works")로 즉시 갱신.
+ * 매 방문마다 Blob을 읽지 않아 더 빠릅니다.
+ */
+export const getWorks = unstable_cache(loadWorks, ["cdl-works"], {
+  tags: ["works"],
+  revalidate: 60,
 });
 
 /** 유튜브 업로드 날짜 기준 최신순 정렬 */

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Lightbox, { type LightboxImage } from "./Lightbox";
 
 export interface JItem {
@@ -191,8 +192,15 @@ function Tile({
           : "none",
       }}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt="" loading="lazy" className="h-full w-full object-cover" />
+      <Image
+        src={src}
+        alt=""
+        fill
+        sizes="(max-width: 768px) 90vw, 33vw"
+        className="select-none object-cover"
+        onContextMenu={(e) => e.preventDefault()}
+        draggable={false}
+      />
     </button>
   );
 }
