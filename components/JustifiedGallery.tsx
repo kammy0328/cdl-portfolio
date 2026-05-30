@@ -52,7 +52,7 @@ export default function JustifiedGallery({ items }: { items: JItem[] }) {
     }
     if (Object.keys(seeded).length) setRatios((p) => ({ ...seeded, ...p }));
     toLoad.forEach((it) => {
-      const img = new Image();
+      const img = new window.Image(); // next/image의 Image와 충돌 방지
       img.onload = () => {
         if (!alive || img.naturalHeight === 0) return;
         setRatios((p) =>
