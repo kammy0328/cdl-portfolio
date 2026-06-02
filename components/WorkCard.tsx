@@ -40,9 +40,8 @@ function loadYT(): Promise<YTApi> {
   return ytReady;
 }
 
-// 재생 시작(PLAYING) 후, 유튜브 자체 UI(제목 바 등)가 자동으로 사라질 때까지 기다렸다
-// 썸네일을 디졸브 → 크롭 없이 전체 프레임 그대로, UI 없이 깔끔하게 전환
-const REVEAL_DELAY = 1600;
+// 재생 시작(PLAYING) 후 짧게 기다렸다 디졸브 — 유튜브 시작 UI가 가라앉을 최소 시간
+const REVEAL_DELAY = 600;
 
 export default function WorkCard({ work }: { work: Work }) {
   const platform = videoPlatform(work);
@@ -106,16 +105,21 @@ export default function WorkCard({ work }: { work: Work }) {
     };
   }, [hovered, platform, work.youtubeId]);
 
+  // 첫 호버 지연 제거 — 마운트 시 YouTube IFrame API를 미리 로드
+  useEffect(() => {
+    if (platform === "youtube") loadYT();
+  }, [platform]);
+
   const isVimeo = platform === "vimeo";
 
   return (
     <Link
       href={`/work/${work.slug}`}
-      className="block"
+      className="group block"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <div className="relative aspect-video overflow-hidden rounded-sm bg-ink-soft ring-1 ring-ink-line">
+      <div className="relative aspect-video overflow-hidden rounded-sm bg-ink-soft ring-1 ring-ink-line transition-transform duration-300 ease-out group-hover:scale-[1.02]">
         {/* YouTube 플레이어 (뒤) — 크롭 없이 전체 프레임, controls=0 + pointer-events-none로 UI 숨김 */}
         {platform === "youtube" && (
           <div
@@ -143,7 +147,7 @@ export default function WorkCard({ work }: { work: Work }) {
             src={thumb}
             alt={work.title}
             loading="lazy"
-            className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-out"
+            className="absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ease-out"
             style={{ opacity: hovered && playing ? 0 : 1 }}
             onError={() => {
               if (platform === "youtube" && work.youtubeId) {
