@@ -1,28 +1,102 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { Work } from "@/data/works";
 import { displayArtist } from "@/lib/works";
 import { videoThumb, videoEmbedUrl, videoPlatform } from "@/lib/video";
 
-export default function WorkCard({ work }: { work: Work }) {
-  const [hovered, setHovered] = useState(false);
-  const [ready, setReady] = useState(false); // 영상 재생 추정 → 썸네일 디졸브
-  const [mounted, setMounted] = useState(false); // iframe 마운트 (로드)
-  const [thumb, setThumb] = useState(videoThumb(work));
-  const platform = videoPlatform(work);
+// ---- YouTube IFrame API (lazy · 한 번만 로드) ----
+type YTPlayer = {
+  destroy: () => void;
+  mute: () => void;
+  playVideo: () => void;
+};
+type YTEvent = { target: YTPlayer; data: number };
+type YTApi = {
+  Player: new (el: HTMLElement, opts: unknown) => YTPlayer;
+  PlayerState: { PLAYING: number };
+};
+type WinYT = Window & {
+  YT?: YTApi;
+  onYouTubeIframeAPIReady?: () => void;
+};
 
+let ytReady: Promise<YTApi> | null = null;
+function loadYT(): Promise<YTApi> {
+  const w = window as WinYT;
+  if (w.YT?.Player) return Promise.resolve(w.YT);
+  if (ytReady) return ytReady;
+  ytReady = new Promise<YTApi>((resolve) => {
+    const prev = w.onYouTubeIframeAPIReady;
+    w.onYouTubeIframeAPIReady = () => {
+      prev?.();
+      if (w.YT) resolve(w.YT);
+    };
+    const tag = document.createElement("script");
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(tag);
+  });
+  return ytReady;
+}
+
+export default function WorkCard({ work }: { work: Work }) {
+  const platform = videoPlatform(work);
+  const [hovered, setHovered] = useState(false);
+  const [playing, setPlaying] = useState(false); // 실제 재생 시작 → 썸네일 디졸브
+  const [thumb, setThumb] = useState(videoThumb(work));
+  const holderRef = useRef<HTMLDivElement>(null);
+  const playerRef = useRef<YTPlayer | null>(null);
+
+  // YouTube — PLAYING 상태가 되면 디졸브 (스피너 노출 없음)
   useEffect(() => {
-    if (hovered && platform) {
-      setMounted(true); // 즉시 로드 시작 (보이지 않게)
-      const t = setTimeout(() => setReady(true), 650); // 재생 시작 즈음 디졸브
-      return () => clearTimeout(t);
-    }
-    setReady(false); // 썸네일 다시 페이드인
-    const t = setTimeout(() => setMounted(false), 800); // 썸네일이 덮은 뒤 언마운트
-    return () => clearTimeout(t);
-  }, [hovered, platform]);
+    if (!hovered || platform !== "youtube" || !work.youtubeId) return;
+    let cancelled = false;
+    const holder = holderRef.current;
+    loadYT().then((YT) => {
+      if (cancelled || !holder) return;
+      const el = document.createElement("div");
+      holder.appendChild(el);
+      playerRef.current = new YT.Player(el, {
+        videoId: work.youtubeId,
+        playerVars: {
+          autoplay: 1,
+          mute: 1,
+          controls: 0,
+          loop: 1,
+          playlist: work.youtubeId,
+          modestbranding: 1,
+          rel: 0,
+          playsinline: 1,
+          disablekb: 1,
+          fs: 0,
+          iv_load_policy: 3,
+        },
+        events: {
+          onReady: (e: YTEvent) => {
+            e.target.mute();
+            e.target.playVideo();
+          },
+          onStateChange: (e: YTEvent) => {
+            if (!cancelled && e.data === YT.PlayerState.PLAYING) setPlaying(true);
+          },
+        },
+      });
+    });
+    return () => {
+      cancelled = true;
+      setPlaying(false);
+      try {
+        playerRef.current?.destroy();
+      } catch {
+        /* noop */
+      }
+      playerRef.current = null;
+      if (holder) holder.innerHTML = "";
+    };
+  }, [hovered, platform, work.youtubeId]);
+
+  const isVimeo = platform === "vimeo";
 
   return (
     <Link
@@ -32,18 +106,27 @@ export default function WorkCard({ work }: { work: Work }) {
       onMouseLeave={() => setHovered(false)}
     >
       <div className="relative aspect-video overflow-hidden rounded-sm bg-ink-soft ring-1 ring-ink-line">
-        {/* 무음 영상 (뒤) — 130% 확대로 유튜브 UI(제목·로고)를 화면 밖으로 크롭 */}
-        {mounted && platform && (
+        {/* YouTube 플레이어 (뒤) — 130% 확대로 제목·로고를 화면 밖으로 크롭 */}
+        {platform === "youtube" && (
+          <div
+            ref={holderRef}
+            aria-hidden="true"
+            className="pointer-events-none absolute left-1/2 top-1/2 h-[130%] w-[130%] -translate-x-1/2 -translate-y-1/2 [&>iframe]:h-full [&>iframe]:w-full"
+          />
+        )}
+        {/* Vimeo 미리보기 (뒤) — background 모드는 UI 없이 즉시 재생 */}
+        {isVimeo && hovered && (
           <iframe
             src={videoEmbedUrl(work, true)}
             title={work.title}
             allow="autoplay; muted; picture-in-picture"
             tabIndex={-1}
             aria-hidden="true"
-            className="pointer-events-none absolute left-1/2 top-1/2 h-[130%] w-[130%] -translate-x-1/2 -translate-y-1/2 border-0"
+            onLoad={() => setPlaying(true)}
+            className="pointer-events-none absolute inset-0 h-full w-full border-0"
           />
         )}
-        {/* 썸네일 (앞) — 영상이 준비되면 디졸브로 사라짐 */}
+        {/* 썸네일 (앞) — 영상이 실제 재생되면 디졸브로 사라짐 */}
         {thumb && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -51,7 +134,7 @@ export default function WorkCard({ work }: { work: Work }) {
             alt={work.title}
             loading="lazy"
             className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-out"
-            style={{ opacity: hovered && ready ? 0 : 1 }}
+            style={{ opacity: hovered && playing ? 0 : 1 }}
             onError={() => {
               if (platform === "youtube" && work.youtubeId) {
                 setThumb(`https://i.ytimg.com/vi/${work.youtubeId}/hqdefault.jpg`);
