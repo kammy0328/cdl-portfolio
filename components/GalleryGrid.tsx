@@ -11,6 +11,7 @@ function toItems(stills: GalleryStill[]): JItem[] {
     caption: `${s.workTitle} · ${s.artist}`,
     w: s.w,
     h: s.h,
+    blur: s.blur,
   }));
 }
 

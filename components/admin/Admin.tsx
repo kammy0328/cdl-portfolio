@@ -92,7 +92,7 @@ export default function Admin() {
       await loadWorks();
       setPhase("ready");
     } else {
-      setLoginErr("비밀번호가 올바르지 않습니다.");
+      setLoginErr(d.error || "비밀번호가 올바르지 않습니다.");
     }
   }
 
@@ -142,7 +142,7 @@ export default function Admin() {
     for (const file of files) {
       setUploading((n) => n + 1);
       try {
-        const { blob, w, h } = await compressImage(file);
+        const { blob, w, h, blur } = await compressImage(file);
         const fd = new FormData();
         fd.append("file", blob, "still.webp");
         fd.append("w", String(w));
@@ -151,7 +151,7 @@ export default function Admin() {
         if (r.ok) {
           setWorks((ws) =>
             ws.map((wk, idx) =>
-              idx === i ? { ...wk, stills: [...wk.stills, { src: r.src, w: r.w, h: r.h }] } : wk
+              idx === i ? { ...wk, stills: [...wk.stills, { src: r.src, w: r.w, h: r.h, blur }] } : wk
             )
           );
         }

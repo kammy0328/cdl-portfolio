@@ -11,6 +11,7 @@ export interface JItem {
   /** 알고 있으면 비율 측정 생략 (관리자 업로드 시 저장) */
   w?: number;
   h?: number;
+  blur?: string;
 }
 
 const GAP = 4; // 헤어라인 간격 (px)
@@ -112,6 +113,7 @@ export default function JustifiedGallery({ items }: { items: JItem[] }) {
                 <Tile
                   key={cell.item.src + cell.idx}
                   src={cell.item.src}
+                  blur={cell.item.blur}
                   width={cell.w}
                   height={row.h}
                   onClick={() => setIdx(cell.idx)}
@@ -140,11 +142,13 @@ export default function JustifiedGallery({ items }: { items: JItem[] }) {
  */
 function Tile({
   src,
+  blur,
   width,
   height,
   onClick,
 }: {
   src: string;
+  blur?: string;
   width: number;
   height: number;
   onClick: () => void;
@@ -197,6 +201,8 @@ function Tile({
         alt=""
         fill
         sizes="(max-width: 768px) 90vw, 33vw"
+        placeholder={blur ? "blur" : "empty"}
+        blurDataURL={blur}
         className="select-none object-cover"
         onContextMenu={(e) => e.preventDefault()}
         draggable={false}

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { site } from "@/lib/site";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 // 문의 폼 → Resend 로 이메일 전송.
 // RESEND_API_KEY 환경변수가 설정되지 않았으면 ok:false, configured:false 를 반환하고
@@ -10,6 +11,13 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  // 스팸 방어 — IP당 5회 / 10분
+  if (!rateLimit(`contact:${clientIp(req)}`, 5, 10 * 60 * 1000)) {
+    return NextResponse.json(
+      { ok: false, error: "Too many requests." },
+      { status: 429 }
+    );
+  }
   try {
     const { name, email, type, message, website } = await req.json();
 

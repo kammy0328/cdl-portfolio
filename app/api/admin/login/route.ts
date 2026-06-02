@@ -1,7 +1,15 @@
 import { NextResponse } from "next/server";
 import { ADMIN_COOKIE, adminToken, isConfigured } from "@/lib/admin-auth";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
+  // 무차별 대입 방어 — IP당 10회 / 10분
+  if (!rateLimit(`login:${clientIp(req)}`, 10, 10 * 60 * 1000)) {
+    return NextResponse.json(
+      { ok: false, error: "로그인 시도가 너무 많습니다. 잠시 후 다시 시도해 주세요." },
+      { status: 429 }
+    );
+  }
   if (!isConfigured()) {
     return NextResponse.json({ ok: false, configured: false });
   }

@@ -19,6 +19,7 @@ export default function StillsGallery({
     src: s.src,
     w: s.w,
     h: s.h,
+    blur: s.blur,
     caption: `${title} — Still ${String(i + 1).padStart(2, "0")}`,
   }));
 

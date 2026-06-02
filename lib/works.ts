@@ -69,6 +69,7 @@ export interface GalleryStill {
   src: string;
   w?: number;
   h?: number;
+  blur?: string;
   workSlug: string;
   workTitle: string;
   artist: string;
@@ -82,6 +83,7 @@ export async function getAllStills(): Promise<GalleryStill[]> {
       src: s.src,
       w: s.w,
       h: s.h,
+      blur: s.blur,
       workSlug: w.slug,
       workTitle: w.title,
       artist: displayArtist(w),

@@ -23,6 +23,8 @@ export interface Still {
   w?: number;
   /** 원본 세로 픽셀 (선택) */
   h?: number;
+  /** 흐릿한 미리보기(LQIP) base64 — 로딩 중 표시 (선택) */
+  blur?: string;
 }
 
 export interface Work {

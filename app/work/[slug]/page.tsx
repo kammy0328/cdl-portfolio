@@ -37,8 +37,24 @@ export default async function WorkPage({
 
   const { prev, next } = await getAdjacentWorks(slug);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    name: `${work.title} — ${displayArtist(work)}`,
+    description:
+      work.description || `${displayArtist(work)} · ${work.category} — color by CDL`,
+    thumbnailUrl: `https://i.ytimg.com/vi/${work.youtubeId}/maxresdefault.jpg`,
+    uploadDate: work.publishedAt,
+    embedUrl: `https://www.youtube.com/embed/${work.youtubeId}`,
+    contentUrl: `https://youtu.be/${work.youtubeId}`,
+  };
+
   return (
     <article className="pt-28 sm:pt-32">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="wrap">
         {/* 뒤로 */}
         <Link

@@ -4,6 +4,8 @@ export interface Compressed {
   blob: Blob;
   w: number;
   h: number;
+  /** 로딩 중 표시할 흐릿한 미리보기(LQIP) data URL */
+  blur: string;
 }
 
 function loadImg(file: File): Promise<HTMLImageElement> {
@@ -59,7 +61,16 @@ export async function compressImage(
     )
   );
 
-  return { blob, w, h };
+  // 흐릿한 미리보기(LQIP) — 작은 캔버스로 축소 후 base64
+  const bw = 24;
+  const bh = Math.max(1, Math.round((bw * h) / w));
+  const bc = document.createElement("canvas");
+  bc.width = bw;
+  bc.height = bh;
+  bc.getContext("2d")?.drawImage(source, 0, 0, bw, bh);
+  const blur = bc.toDataURL("image/jpeg", 0.5);
+
+  return { blob, w, h, blur };
 }
 
 /** 유튜브 URL 또는 ID 문자열에서 영상 ID 추출 */
