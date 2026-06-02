@@ -115,11 +115,14 @@ export default function WorkCard({ work }: { work: Work }) {
   return (
     <Link
       href={`/work/${work.slug}`}
-      className="group block"
+      className="block"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <div className="relative aspect-video overflow-hidden rounded-sm bg-ink-soft ring-1 ring-ink-line transition-transform duration-300 ease-out group-hover:scale-[1.02]">
+      <div
+        className="relative aspect-video overflow-hidden rounded-sm bg-ink-soft ring-1 ring-ink-line transition-transform duration-300 ease-out"
+        style={{ transform: hovered ? "scale(1.02)" : "scale(1)" }}
+      >
         {/* YouTube 플레이어 (뒤) — 크롭 없이 전체 프레임, controls=0 + pointer-events-none로 UI 숨김 */}
         {platform === "youtube" && (
           <div
