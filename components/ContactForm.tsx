@@ -151,9 +151,12 @@ ${form.message}`;
       <button
         type="submit"
         disabled={status === "sending"}
-        className="inline-flex items-center gap-2 rounded-sm bg-bone px-7 py-3.5 text-sm font-medium text-ink transition hover:bg-accent-warm disabled:opacity-60"
+        className="group inline-flex items-center gap-3 rounded-sm bg-bone px-9 py-4 font-mono text-xs font-semibold uppercase tracking-[0.25em] text-ink transition-colors hover:bg-accent-warm disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {status === "sending" ? "전송 중…" : "보내기"}
+        {status === "sending" ? "Sending…" : "Send"}
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="transition-transform duration-300 group-hover:translate-x-1">
+          <path d="M5 12h14M13 6l6 6-6 6" />
+        </svg>
       </button>
 
       {/* 허니팟: 사용자에겐 숨김, 봇 탐지용 (레이아웃 영향 없도록 폼 끝에 배치) */}

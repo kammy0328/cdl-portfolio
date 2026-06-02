@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useCallback, useEffect, useRef } from "react";
 
 export interface LightboxImage {
@@ -90,6 +89,16 @@ export default function Lightbox({
     };
   }, [open, go, onClose]);
 
+  // 인접 이미지 미리 로드 → 스와이프/화살표 전환 시 즉시 표시
+  useEffect(() => {
+    if (index === null) return;
+    [index - 1, index + 1].forEach((k) => {
+      const j = (k + images.length) % images.length;
+      const im = new window.Image();
+      im.src = images[j].src;
+    });
+  }, [index, images]);
+
   if (!open || index === null) return null;
   const current = images[index];
 
@@ -115,19 +124,17 @@ export default function Lightbox({
         </svg>
       </button>
 
-      {/* 이미지 — 고정 크기 영역 + object-contain → 해상도/비율 달라도 균일한 사이즈감 */}
+      {/* 이미지 — 원본 직접 표시(재압축/딜레이 없음), 콘텐츠 크기로 렌더 → 이미지 밖 클릭 시 닫힘 */}
       <figure className="mx-auto flex flex-col items-center">
-        <div className="relative flex h-[74vh] w-[90vw] items-center justify-center">
-          <Image
+        <div className="relative inline-block">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src={current.src}
             alt={current.caption ?? ""}
-            fill
-            sizes="92vw"
-            quality={90}
             onClick={(e) => e.stopPropagation()}
             onContextMenu={(e) => e.preventDefault()}
             draggable={false}
-            className="select-none object-contain"
+            className="block max-h-[78vh] max-w-[94vw] select-none"
           />
           {/* 데스크탑 화살표 — 이미지 영역 세로 중앙, 모바일에선 숨김(스와이프 사용) */}
           {images.length > 1 && (

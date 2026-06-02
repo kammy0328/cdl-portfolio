@@ -22,7 +22,7 @@ function loadImg(file: File): Promise<HTMLImageElement> {
 export async function compressImage(
   file: File,
   maxSide = 2400,
-  quality = 0.9
+  quality = 0.95
 ): Promise<Compressed> {
   let iw: number;
   let ih: number;
