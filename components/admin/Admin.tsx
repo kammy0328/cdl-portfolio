@@ -1,9 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { compressImage, parseYouTubeId } from "@/lib/compress";
-import YouTubeThumb from "@/components/YouTubeThumb";
+import { compressImage } from "@/lib/compress";
+import { parseVideo } from "@/lib/video";
 import type { Work } from "@/data/works";
+
+/** 카드/미리보기 썸네일 — YouTube는 ID로, Vimeo는 thumb 사용 */
+function mediaThumb(w: Work): string {
+  const v = parseVideo(w.vimeoId || w.youtubeId || "");
+  if (!v) return "";
+  return v.platform === "vimeo"
+    ? w.thumb || ""
+    : `https://i.ytimg.com/vi/${v.id}/maxresdefault.jpg`;
+}
 
 type Phase = "loading" | "needconfig" | "login" | "ready";
 
@@ -117,23 +126,30 @@ export default function Admin() {
     setEditing(null);
   }
 
-  async function fetchYt(i: number, raw: string) {
-    const id = parseYouTubeId(raw);
-    update(i, { youtubeId: id });
-    if (id.length < 5) return;
-    const r = await fetch(`/api/admin/youtube?id=${encodeURIComponent(id)}`).then((r) => r.json());
-    if (r.ok) {
-      const w = works[i];
-      const isMV = w.category === "Music Video";
-      update(i, {
-        title: w.title || r.title || "",
-        ...(isMV
-          ? { group: w.group || r.artist || "" }
-          : { artist: w.artist || r.artist || "" }),
-        publishedAt: w.publishedAt || r.publishedAt || "",
-        slug: w.slug || slugify(r.title || ""),
-      });
+  async function fetchVideo(i: number) {
+    const w = works[i];
+    const raw = w.vimeoId && w.vimeoId.trim() ? w.vimeoId : w.youtubeId;
+    if (!parseVideo(raw || "")) return;
+    const r = await fetch(`/api/admin/video?url=${encodeURIComponent(raw)}`).then((x) => x.json());
+    if (!r.ok) return;
+    const isMV = w.category === "Music Video";
+    const patch: Partial<Work> = {
+      title: w.title || r.title || "",
+      publishedAt: w.publishedAt || r.publishedAt || "",
+      slug: w.slug || slugify(r.title || ""),
+    };
+    if (isMV) patch.group = w.group || r.artist || "";
+    else patch.artist = w.artist || r.artist || "";
+    if (r.platform === "vimeo") {
+      patch.vimeoId = r.id;
+      patch.youtubeId = "";
+      patch.thumb = r.thumb || undefined;
+    } else {
+      patch.youtubeId = r.id;
+      patch.vimeoId = "";
+      patch.thumb = undefined;
     }
+    update(i, patch);
   }
 
   async function handleFiles(i: number, list: FileList | null) {
@@ -164,11 +180,18 @@ export default function Admin() {
   }
 
   async function save() {
-    const prepared = works.map((w) => ({
-      ...w,
-      slug: w.slug || slugify(w.title),
-      youtubeId: parseYouTubeId(w.youtubeId),
-    }));
+    const prepared = works.map((w) => {
+      const yt = parseVideo(w.youtubeId || "");
+      const vm = parseVideo(w.vimeoId || "");
+      const isVimeo = vm?.platform === "vimeo";
+      return {
+        ...w,
+        slug: w.slug || slugify(w.title),
+        youtubeId: yt?.platform === "youtube" ? yt.id : "",
+        vimeoId: isVimeo ? vm.id : "",
+        thumb: isVimeo ? w.thumb : undefined,
+      };
+    });
     setSaving(true);
     setMsg("");
     const r = await fetch("/api/admin/works", {
@@ -273,10 +296,11 @@ export default function Admin() {
                 className="group block overflow-hidden rounded-sm border border-ink-line bg-ink-card text-left transition hover:border-bone-dim"
               >
                 <div className="relative aspect-video bg-ink-soft">
-                  {w.youtubeId ? (
-                    <YouTubeThumb id={parseYouTubeId(w.youtubeId)} alt={w.title} className="h-full w-full object-cover" />
+                  {mediaThumb(w) ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={mediaThumb(w)} alt={w.title} className="h-full w-full object-cover" />
                   ) : (
-                    <div className="flex h-full items-center justify-center text-xs text-bone-faint">유튜브 ID 필요</div>
+                    <div className="flex h-full items-center justify-center text-xs text-bone-faint">영상 URL 필요</div>
                   )}
                   <span className="absolute right-2 top-2 rounded-sm bg-black/60 px-2 py-1 font-mono text-[10px] text-bone">
                     스틸 {w.stills.length}
@@ -302,7 +326,7 @@ export default function Admin() {
           uploading={uploading}
           onChange={(patch) => update(editing, patch)}
           onRemove={() => removeWork(editing)}
-          onFetchYt={(raw) => fetchYt(editing, raw)}
+          onFetchVideo={() => fetchVideo(editing)}
           onFiles={(list) => handleFiles(editing, list)}
         />
       )}
@@ -317,14 +341,14 @@ function WorkEditor({
   uploading,
   onChange,
   onRemove,
-  onFetchYt,
+  onFetchVideo,
   onFiles,
 }: {
   work: Work;
   uploading: number;
   onChange: (patch: Partial<Work>) => void;
   onRemove: () => void;
-  onFetchYt: (raw: string) => void;
+  onFetchVideo: () => void;
   onFiles: (list: FileList | null) => void;
 }) {
   const [drag, setDrag] = useState(false);
@@ -332,20 +356,21 @@ function WorkEditor({
   const [overIdx, setOverIdx] = useState<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const ytId = parseYouTubeId(work.youtubeId);
+  const thumb = mediaThumb(work);
 
   return (
     <div className="rounded-sm border border-ink-line bg-ink-card p-5 sm:p-7">
       <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
-        {/* 썸네일 (읽기 전용) */}
+        {/* 썸네일 (읽기 전용 · 영상에서 자동) */}
         <div>
-          <span className="label">썸네일 (유튜브 자동 · 변경 불가)</span>
+          <span className="label">썸네일 (영상 자동 · 변경 불가)</span>
           <div className="mt-2 aspect-video overflow-hidden rounded-sm bg-ink-soft ring-1 ring-ink-line">
-            {ytId ? (
-              <YouTubeThumb id={ytId} alt="" className="h-full w-full object-cover" />
+            {thumb ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={thumb} alt="" className="h-full w-full object-cover" />
             ) : (
               <div className="flex h-full items-center justify-center px-3 text-center text-xs text-bone-faint">
-                유튜브 ID를 입력하면 썸네일이 표시됩니다
+                영상 URL을 입력하고 “불러오기”를 누르면 표시됩니다
               </div>
             )}
           </div>
@@ -354,10 +379,19 @@ function WorkEditor({
         {/* 메타데이터 */}
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block sm:col-span-2">
-            <span className="label">유튜브 URL / ID</span>
+            <span className="label">YouTube URL / ID</span>
             <div className="mt-1 flex gap-2">
               <input className={fieldCls} value={work.youtubeId} onChange={(e) => onChange({ youtubeId: e.target.value })} placeholder="youtu.be/XXXX 또는 ID" />
-              <button type="button" onClick={() => onFetchYt(work.youtubeId)} className="shrink-0 rounded-sm border border-ink-line px-3 text-xs text-bone-dim transition hover:bg-white/5 hover:text-bone">
+              <button type="button" onClick={onFetchVideo} className="shrink-0 rounded-sm border border-ink-line px-3 text-xs text-bone-dim transition hover:bg-white/5 hover:text-bone">
+                불러오기
+              </button>
+            </div>
+          </label>
+          <label className="block sm:col-span-2">
+            <span className="label">Vimeo URL / ID (선택 · YouTube 대신)</span>
+            <div className="mt-1 flex gap-2">
+              <input className={fieldCls} value={work.vimeoId ?? ""} onChange={(e) => onChange({ vimeoId: e.target.value })} placeholder="vimeo.com/123456789" />
+              <button type="button" onClick={onFetchVideo} className="shrink-0 rounded-sm border border-ink-line px-3 text-xs text-bone-dim transition hover:bg-white/5 hover:text-bone">
                 불러오기
               </button>
             </div>

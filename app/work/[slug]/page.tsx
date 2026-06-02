@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getWorkBySlug, getAdjacentWorks, formatDate, displayArtist } from "@/lib/works";
+import { videoThumb, videoEmbedUrl, videoWatchUrl } from "@/lib/video";
 import VideoEmbed from "@/components/VideoEmbed";
 import StillsGallery from "@/components/StillsGallery";
 
@@ -21,7 +22,7 @@ export async function generateMetadata({
     description: work.description || `${work.artist} · ${work.category} — color by CDL`,
     openGraph: {
       title,
-      images: [`https://i.ytimg.com/vi/${work.youtubeId}/maxresdefault.jpg`],
+      images: videoThumb(work) ? [videoThumb(work)] : [],
     },
   };
 }
@@ -43,10 +44,10 @@ export default async function WorkPage({
     name: `${work.title} — ${displayArtist(work)}`,
     description:
       work.description || `${displayArtist(work)} · ${work.category} — color by CDL`,
-    thumbnailUrl: `https://i.ytimg.com/vi/${work.youtubeId}/maxresdefault.jpg`,
+    thumbnailUrl: videoThumb(work),
     uploadDate: work.publishedAt,
-    embedUrl: `https://www.youtube.com/embed/${work.youtubeId}`,
-    contentUrl: `https://youtu.be/${work.youtubeId}`,
+    embedUrl: videoEmbedUrl(work, false),
+    contentUrl: videoWatchUrl(work),
   };
 
   return (
@@ -77,7 +78,7 @@ export default async function WorkPage({
 
         {/* 영상 */}
         <div className="mt-10">
-          <VideoEmbed youtubeId={work.youtubeId} title={`${work.title} — ${work.artist}`} />
+          <VideoEmbed work={work} />
         </div>
 
         {/* 크레딧 / 정보 */}

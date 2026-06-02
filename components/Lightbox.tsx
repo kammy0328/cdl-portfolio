@@ -35,6 +35,7 @@ export default function Lightbox({
   );
 
   // 모바일 스와이프 — 좌우로 밀면 이전/다음 이미지, 배경 탭은 닫기
+  const dialogRef = useRef<HTMLDivElement>(null);
   const startRef = useRef<{ x: number; y: number } | null>(null);
   const swipedRef = useRef(false);
   const onTouchStart = (e: React.TouchEvent) => {
@@ -74,18 +75,39 @@ export default function Lightbox({
 
   useEffect(() => {
     if (!open) return;
+    const prevFocus = document.activeElement as HTMLElement | null;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
       else if (e.key === "ArrowRight") go(1);
       else if (e.key === "ArrowLeft") go(-1);
+      else if (e.key === "Tab") {
+        // 포커스 트랩 — Tab이 라이트박스 밖으로 새지 않도록
+        const f = dialogRef.current?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (f && f.length) {
+          const list = Array.from(f);
+          const first = list[0];
+          const last = list[list.length - 1];
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
     };
     window.addEventListener("keydown", onKey);
-    // 라이트박스가 열려 있는 동안 배경 스크롤 잠금 (scrollbar-gutter: stable 로 이동 없음)
+    // 배경 스크롤 잠금 + 다이얼로그로 포커스 이동
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    dialogRef.current?.focus();
     return () => {
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
+      prevFocus?.focus?.();
     };
   }, [open, go, onClose]);
 
@@ -104,7 +126,9 @@ export default function Lightbox({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md animate-fade-in"
+      ref={dialogRef}
+      tabIndex={-1}
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 outline-none backdrop-blur-md animate-fade-in"
       style={{ touchAction: "none" }}
       onClick={onBackdropClick}
       onTouchStart={onTouchStart}

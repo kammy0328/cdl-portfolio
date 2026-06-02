@@ -37,6 +37,10 @@ export interface Work {
   category: string;
   /** 유튜브 영상 ID */
   youtubeId: string;
+  /** Vimeo 영상 ID (유튜브 대신 사용 시) */
+  vimeoId?: string;
+  /** 카드 썸네일 URL 직접 지정 (Vimeo 등) — 없으면 youtubeId에서 유추 */
+  thumb?: string;
   /** 유튜브 업로드 날짜 (YYYY-MM-DD) — 정렬 기준 */
   publishedAt: string;
   description?: string;
