@@ -40,6 +40,10 @@ function loadYT(): Promise<YTApi> {
   return ytReady;
 }
 
+// 재생 시작(PLAYING) 후, 유튜브 자체 UI(제목 바 등)가 자동으로 사라질 때까지 기다렸다
+// 썸네일을 디졸브 → 크롭 없이 전체 프레임 그대로, UI 없이 깔끔하게 전환
+const REVEAL_DELAY = 1600;
+
 export default function WorkCard({ work }: { work: Work }) {
   const platform = videoPlatform(work);
   const [hovered, setHovered] = useState(false);
@@ -52,6 +56,7 @@ export default function WorkCard({ work }: { work: Work }) {
   useEffect(() => {
     if (!hovered || platform !== "youtube" || !work.youtubeId) return;
     let cancelled = false;
+    let revealTimer: ReturnType<typeof setTimeout> | undefined;
     const holder = holderRef.current;
     loadYT().then((YT) => {
       if (cancelled || !holder) return;
@@ -78,13 +83,18 @@ export default function WorkCard({ work }: { work: Work }) {
             e.target.playVideo();
           },
           onStateChange: (e: YTEvent) => {
-            if (!cancelled && e.data === YT.PlayerState.PLAYING) setPlaying(true);
+            // 재생이 시작되고 유튜브 UI가 가라앉은 뒤 디졸브 (한 번만)
+            if (cancelled || e.data !== YT.PlayerState.PLAYING || revealTimer) return;
+            revealTimer = setTimeout(() => {
+              if (!cancelled) setPlaying(true);
+            }, REVEAL_DELAY);
           },
         },
       });
     });
     return () => {
       cancelled = true;
+      if (revealTimer) clearTimeout(revealTimer);
       setPlaying(false);
       try {
         playerRef.current?.destroy();
@@ -106,12 +116,12 @@ export default function WorkCard({ work }: { work: Work }) {
       onMouseLeave={() => setHovered(false)}
     >
       <div className="relative aspect-video overflow-hidden rounded-sm bg-ink-soft ring-1 ring-ink-line">
-        {/* YouTube 플레이어 (뒤) — 130% 확대로 제목·로고를 화면 밖으로 크롭 */}
+        {/* YouTube 플레이어 (뒤) — 크롭 없이 전체 프레임, controls=0 + pointer-events-none로 UI 숨김 */}
         {platform === "youtube" && (
           <div
             ref={holderRef}
             aria-hidden="true"
-            className="pointer-events-none absolute left-1/2 top-1/2 h-[130%] w-[130%] -translate-x-1/2 -translate-y-1/2 [&>iframe]:h-full [&>iframe]:w-full"
+            className="pointer-events-none absolute inset-0 [&>iframe]:h-full [&>iframe]:w-full"
           />
         )}
         {/* Vimeo 미리보기 (뒤) — background 모드는 UI 없이 즉시 재생 */}
