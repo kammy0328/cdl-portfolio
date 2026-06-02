@@ -28,7 +28,7 @@ export function videoEmbedUrl(w: VideoFields, preview = false): string {
   }
   if (w.youtubeId) {
     return preview
-      ? `https://www.youtube.com/embed/${w.youtubeId}?autoplay=1&mute=1&loop=1&playlist=${w.youtubeId}&controls=0&modestbranding=1&playsinline=1&rel=0`
+      ? `https://www.youtube.com/embed/${w.youtubeId}?autoplay=1&mute=1&loop=1&playlist=${w.youtubeId}&controls=0&modestbranding=1&rel=0&iv_load_policy=3&playsinline=1&disablekb=1&fs=0`
       : `https://www.youtube.com/embed/${w.youtubeId}?autoplay=1&rel=0&modestbranding=1`;
   }
   return "";
