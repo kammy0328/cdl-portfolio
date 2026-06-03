@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { ADMIN_COOKIE, adminToken, isConfigured } from "@/lib/admin-auth";
+import { ADMIN_COOKIE, adminToken, isConfigured, safeEqual } from "@/lib/admin-auth";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
@@ -14,7 +14,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, configured: false });
   }
   const { password } = await req.json().catch(() => ({ password: "" }));
-  if (!password || password !== process.env.ADMIN_PASSWORD) {
+  const pw = process.env.ADMIN_PASSWORD;
+  if (!password || !pw || !safeEqual(password, pw)) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
   const res = NextResponse.json({ ok: true });

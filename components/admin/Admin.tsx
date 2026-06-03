@@ -66,8 +66,10 @@ export default function Admin() {
   const [uploading, setUploading] = useState(0);
   const [msg, setMsg] = useState("");
 
+  // 마운트 시 1회 부트스트랩 (init은 의도적으로 의존성에서 제외)
   useEffect(() => {
     void init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function init() {

@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     url: site.url,
     siteName: "CDL",
     type: "website",
-    locale: "ko_KR",
+    locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",

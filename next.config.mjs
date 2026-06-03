@@ -9,8 +9,8 @@ const nextConfig = {
       { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
     ],
   },
-  // 빌드 시 ESLint 검사로 인한 배포 실패 방지 (타입 검사는 그대로 유지)
-  eslint: { ignoreDuringBuilds: true },
+  // ESLint를 빌드에 포함 — 오류 시 빌드 실패(경고는 통과). 단독 실행: npm run lint
+  eslint: { ignoreDuringBuilds: false, dirs: ["app", "components", "lib"] },
 };
 
 export default nextConfig;
