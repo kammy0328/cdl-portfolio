@@ -117,7 +117,10 @@ export default function WorkCard({ work }: { work: Work }) {
       href={`/work/${work.slug}`}
       className="block"
       onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseLeave={() => {
+        setHovered(false);
+        setPlaying(false); // Vimeo 등에서 재호버 시 썸네일이 먼저 사라지는 것 방지
+      }}
     >
       <div
         className="relative aspect-video overflow-hidden rounded-sm bg-ink-soft ring-1 ring-ink-line transition-transform duration-300 ease-out"

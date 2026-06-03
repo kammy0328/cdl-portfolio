@@ -72,18 +72,3 @@ export async function compressImage(
 
   return { blob, w, h, blur };
 }
-
-/** 유튜브 URL 또는 ID 문자열에서 영상 ID 추출 */
-export function parseYouTubeId(input: string): string {
-  const s = input.trim();
-  const patterns = [
-    /youtu\.be\/([A-Za-z0-9_-]{11})/,
-    /[?&]v=([A-Za-z0-9_-]{11})/,
-    /youtube\.com\/(?:embed|shorts)\/([A-Za-z0-9_-]{11})/,
-  ];
-  for (const re of patterns) {
-    const m = s.match(re);
-    if (m) return m[1];
-  }
-  return s; // 이미 ID인 경우
-}
