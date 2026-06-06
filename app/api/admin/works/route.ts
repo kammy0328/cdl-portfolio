@@ -41,8 +41,7 @@ export async function POST(req: Request) {
   // 데이터 캐시 무효화 + 페이지 갱신 → 저장 즉시 반영
   try {
     revalidateTag("works");
-    revalidatePath("/");
-    revalidatePath("/gallery");
+    revalidatePath("/", "layout"); // 홈·갤러리·모든 작품 페이지 일괄 무효화
   } catch {
     /* noop */
   }

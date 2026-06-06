@@ -43,7 +43,13 @@ function loadYT(): Promise<YTApi> {
 // 재생 시작(PLAYING) 후 짧게 기다렸다 디졸브 — 유튜브 시작 UI가 가라앉을 최소 시간
 const REVEAL_DELAY = 600;
 
-export default function WorkCard({ work }: { work: Work }) {
+export default function WorkCard({
+  work,
+  priority = false,
+}: {
+  work: Work;
+  priority?: boolean;
+}) {
   const platform = videoPlatform(work);
   const [hovered, setHovered] = useState(false);
   const [playing, setPlaying] = useState(false); // 실제 재생 시작 → 썸네일 디졸브
@@ -105,9 +111,11 @@ export default function WorkCard({ work }: { work: Work }) {
     };
   }, [hovered, platform, work.youtubeId]);
 
-  // 첫 호버 지연 제거 — 마운트 시 YouTube IFrame API를 미리 로드
+  // YouTube IFrame API를 초기 렌더 이후 유휴 시점에 미리 로드 (LCP 경쟁 방지)
   useEffect(() => {
-    if (platform === "youtube") loadYT();
+    if (platform !== "youtube") return;
+    const t = setTimeout(() => loadYT(), 2000);
+    return () => clearTimeout(t);
   }, [platform]);
 
   const isVimeo = platform === "vimeo";
@@ -152,7 +160,8 @@ export default function WorkCard({ work }: { work: Work }) {
           <img
             src={thumb}
             alt={work.title}
-            loading="lazy"
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "auto"}
             className="absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ease-out"
             style={{ opacity: hovered && playing ? 0 : 1 }}
             onError={() => {

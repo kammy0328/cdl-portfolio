@@ -6,7 +6,7 @@ import { videoThumb, videoEmbedUrl, videoWatchUrl } from "@/lib/video";
 import VideoEmbed from "@/components/VideoEmbed";
 import StillsGallery from "@/components/StillsGallery";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export async function generateMetadata({
   params,

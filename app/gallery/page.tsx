@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import GalleryGrid from "@/components/GalleryGrid";
 import { getAllStills } from "@/lib/works";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Gallery",
