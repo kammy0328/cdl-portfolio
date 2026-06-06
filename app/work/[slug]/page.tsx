@@ -1,12 +1,18 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getWorkBySlug, getAdjacentWorks, formatDate, displayArtist } from "@/lib/works";
+import { getWorks, getWorkBySlug, getAdjacentWorks, formatDate, displayArtist } from "@/lib/works";
 import { videoThumb, videoEmbedUrl, videoWatchUrl } from "@/lib/video";
 import VideoEmbed from "@/components/VideoEmbed";
 import StillsGallery from "@/components/StillsGallery";
 
 export const revalidate = 60;
+
+// 빌드 시 모든 작품 페이지를 정적 생성 → CDN HIT (새 작품은 on-demand ISR)
+export async function generateStaticParams() {
+  const works = await getWorks();
+  return works.map((w) => ({ slug: w.slug }));
+}
 
 export async function generateMetadata({
   params,
