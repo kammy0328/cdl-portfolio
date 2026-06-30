@@ -46,5 +46,45 @@ export async function POST(req: Request) {
     /* noop */
   }
 
+  // GitHub에 works-saved.json 백업 커밋 (GITHUB_TOKEN 없으면 무시)
+  void backupToGitHub(body.works);
+
   return NextResponse.json({ ok: true });
+}
+
+async function backupToGitHub(works: unknown[]) {
+  const ghToken = process.env.GITHUB_TOKEN;
+  if (!ghToken) return;
+
+  const repo = "kammy0328/cdl-portfolio";
+  const path = "data/works-saved.json";
+  const apiUrl = `https://api.github.com/repos/${repo}/contents/${path}`;
+  const headers = {
+    Authorization: `Bearer ${ghToken}`,
+    Accept: "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28",
+    "Content-Type": "application/json",
+  };
+
+  try {
+    // 현재 파일 SHA 조회 (업데이트 시 필요)
+    const existing = await fetch(apiUrl, { headers }).then((r) =>
+      r.ok ? r.json() : null
+    );
+    const sha: string | undefined = existing?.sha;
+
+    const content = Buffer.from(JSON.stringify(works, null, 2)).toString("base64");
+    await fetch(apiUrl, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify({
+        message: "chore: sync works from admin",
+        content,
+        sha,
+        branch: "main",
+      }),
+    });
+  } catch {
+    // 백업 실패는 비치명적 — Blob 저장은 이미 완료됨
+  }
 }

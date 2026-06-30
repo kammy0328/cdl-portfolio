@@ -1,28 +1,38 @@
 import { unstable_cache } from "next/cache";
 import { list } from "@vercel/blob";
 import { works as seedWorks, type Work } from "@/data/works";
+import savedWorksJson from "@/data/works-saved.json";
 
 export const WORKS_BLOB_PATH = "works.json";
 
+// 빌드 시 번들된 마지막 어드민 저장본 — Blob 장애 시 폴백
+const savedWorks = savedWorksJson as Work[];
+
+// Blob 없을 때 최선의 폴백: 마지막 저장본 → 시드 순서로 시도
+function bestFallback(): Work[] {
+  return savedWorks.length > 0 ? savedWorks : seedWorks;
+}
+
 /**
  * 포트폴리오 데이터 로드(필터 없음) — Vercel Blob의 works.json 우선,
- * 없거나 오류 시 시드 데이터로 안전 대체. 관리자(어드민)는 이 함수를 직접 사용.
+ * 없거나 오류 시 빌드 번들 저장본 → 시드 데이터 순으로 대체.
+ * 관리자(어드민)는 이 함수를 직접 사용.
  */
 export async function loadWorksRaw(): Promise<Work[]> {
   const token = process.env.BLOB_READ_WRITE_TOKEN;
-  if (!token) return seedWorks;
+  if (!token) return bestFallback();
   try {
     const { blobs } = await list({ prefix: WORKS_BLOB_PATH, limit: 10, token });
     const found = blobs.find((b) => b.pathname === WORKS_BLOB_PATH);
-    if (!found) return seedWorks;
+    if (!found) return bestFallback();
     // CDN 캐시 우회 — works.json 최신본을 읽음 (재검증 시에만 호출)
     const res = await fetch(`${found.url}?t=${Date.now()}`, { cache: "no-store" });
-    if (!res.ok) return seedWorks;
+    if (!res.ok) return bestFallback();
     const data = (await res.json()) as Work[];
-    if (!Array.isArray(data)) return seedWorks;
+    if (!Array.isArray(data)) return bestFallback();
     return data;
   } catch {
-    return seedWorks;
+    return bestFallback();
   }
 }
 
