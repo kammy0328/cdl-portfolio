@@ -65,6 +65,7 @@ export default function Admin() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(0);
   const [msg, setMsg] = useState("");
+  const [uploadErr, setUploadErr] = useState("");
 
   // 마운트 시 1회 부트스트랩 (init은 의도적으로 의존성에서 제외)
   useEffect(() => {
@@ -157,6 +158,7 @@ export default function Admin() {
   async function handleFiles(i: number, list: FileList | null) {
     if (!list) return;
     const files = Array.from(list).filter((f) => f.type.startsWith("image/"));
+    setUploadErr("");
     for (const file of files) {
       setUploading((n) => n + 1);
       try {
@@ -165,16 +167,19 @@ export default function Admin() {
         fd.append("file", blob, "still.webp");
         fd.append("w", String(w));
         fd.append("h", String(h));
-        const r = await fetch("/api/admin/upload", { method: "POST", body: fd }).then((r) => r.json());
+        const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+        const r = await res.json().catch(() => ({ ok: false, error: `서버 오류 (${res.status})` }));
         if (r.ok) {
           setWorks((ws) =>
             ws.map((wk, idx) =>
               idx === i ? { ...wk, stills: [...wk.stills, { src: r.src, w: r.w, h: r.h, blur }] } : wk
             )
           );
+        } else {
+          setUploadErr(r.error || "업로드 실패");
         }
-      } catch {
-        /* skip */
+      } catch (e) {
+        setUploadErr(e instanceof Error ? e.message : "업로드 중 오류가 발생했습니다.");
       } finally {
         setUploading((n) => n - 1);
       }
@@ -266,6 +271,7 @@ export default function Admin() {
         )}
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {uploading > 0 && <span className="label !text-accent-warm">업로드 중 {uploading}…</span>}
+          {uploadErr && <span className="label !text-red-400">{uploadErr}</span>}
           {msg && <span className="label !text-accent-cool">{msg}</span>}
           {editing === null && (
             <button onClick={addWork} className="rounded-sm border border-ink-line px-4 py-2 text-sm transition hover:bg-white/5">
