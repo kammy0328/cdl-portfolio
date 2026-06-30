@@ -147,38 +147,38 @@ export default function Lightbox({
         </svg>
       </button>
 
-      {/* [← 버튼] [이미지+캡션] [→ 버튼] — 화살표는 이미지 옆, 이미지 중앙 정렬 */}
-      <div className="flex w-full items-center justify-center gap-2 md:gap-6 px-2">
+      {/* 화살표는 이미지와 같은 행에만 — 캡션 높이 무관하게 이미지 세로 중앙에 고정 */}
+      <figure
+        className="flex min-w-0 flex-col items-center"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* 이미지 행: [← 화살표] [img] [→ 화살표] */}
+        <div className="flex items-center gap-2 md:gap-6 px-2">
 
-        {/* 이전 화살표 */}
-        <div className="hidden md:flex shrink-0 w-16 justify-center">
-          {multi && (
-            <button
-              onClick={(e) => { e.stopPropagation(); go(-1); }}
-              aria-label="Previous"
-              className="group flex items-center justify-center p-3 outline-none transition-transform duration-150 active:scale-75"
-            >
-              <svg
-                width="44" height="44"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-white/20 transition-all duration-300 group-hover:text-white group-hover:-translate-x-1.5 group-active:text-white/60"
+          {/* 이전 화살표 */}
+          <div className="hidden md:flex shrink-0 w-16 justify-center">
+            {multi && (
+              <button
+                onClick={(e) => { e.stopPropagation(); go(-1); }}
+                aria-label="Previous"
+                className="group flex items-center justify-center p-3 outline-none"
               >
-                <path d="m15 18-6-6 6-6" />
-              </svg>
-            </button>
-          )}
-        </div>
+                <svg
+                  width="44" height="44"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-white/20 transition-colors duration-300 group-hover:text-white"
+                >
+                  <path d="m15 18-6-6 6-6" />
+                </svg>
+              </button>
+            )}
+          </div>
 
-        {/* 이미지 + 캡션 */}
-        <figure
-          className="flex min-w-0 flex-col items-center"
-          onClick={(e) => e.stopPropagation()}
-        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={current.src}
@@ -187,53 +187,55 @@ export default function Lightbox({
             draggable={false}
             className="block max-h-[78vh] max-w-[min(calc(100vw-12rem),94vw)] select-none md:max-w-[min(calc(100vw-14rem),94vw)]"
           />
-          <figcaption className="mt-5 flex flex-col items-center gap-3 text-center">
-            {current.caption && (
-              <span className="text-sm text-bone-dim">{current.caption}</span>
-            )}
-            {current.href && (
-              <Link
-                href={current.href}
-                onClick={(e) => e.stopPropagation()}
-                className="group inline-flex items-center gap-1.5 rounded-sm border border-ink-line bg-white/5 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.15em] text-bone transition hover:border-bone-dim hover:bg-white/10"
-              >
-                View Project
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition group-hover:translate-x-0.5">
-                  <path d="M5 12h14M13 6l6 6-6 6" />
-                </svg>
-              </Link>
-            )}
-            {multi && (
-              <span className="label md:hidden">← 좌우로 밀어 넘기기 →</span>
-            )}
-          </figcaption>
-        </figure>
 
-        {/* 다음 화살표 */}
-        <div className="hidden md:flex shrink-0 w-16 justify-center">
-          {multi && (
-            <button
-              onClick={(e) => { e.stopPropagation(); go(1); }}
-              aria-label="Next"
-              className="group flex items-center justify-center p-3 outline-none transition-transform duration-150 active:scale-75"
-            >
-              <svg
-                width="44" height="44"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-white/20 transition-all duration-300 group-hover:text-white group-hover:translate-x-1.5 group-active:text-white/60"
+          {/* 다음 화살표 */}
+          <div className="hidden md:flex shrink-0 w-16 justify-center">
+            {multi && (
+              <button
+                onClick={(e) => { e.stopPropagation(); go(1); }}
+                aria-label="Next"
+                className="group flex items-center justify-center p-3 outline-none"
               >
-                <path d="m9 18 6-6-6-6" />
-              </svg>
-            </button>
-          )}
+                <svg
+                  width="44" height="44"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-white/20 transition-colors duration-300 group-hover:text-white"
+                >
+                  <path d="m9 18 6-6-6-6" />
+                </svg>
+              </button>
+            )}
+          </div>
+
         </div>
 
-      </div>
+        {/* 캡션 — 이미지 행 아래 */}
+        <figcaption className="mt-5 flex flex-col items-center gap-3 text-center">
+          {current.caption && (
+            <span className="text-sm text-bone-dim">{current.caption}</span>
+          )}
+          {current.href && (
+            <Link
+              href={current.href}
+              onClick={(e) => e.stopPropagation()}
+              className="group inline-flex items-center gap-1.5 rounded-sm border border-ink-line bg-white/5 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.15em] text-bone transition hover:border-bone-dim hover:bg-white/10"
+            >
+              View Project
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition group-hover:translate-x-0.5">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </Link>
+          )}
+          {multi && (
+            <span className="label md:hidden">← 좌우로 밀어 넘기기 →</span>
+          )}
+        </figcaption>
+      </figure>
     </div>
   );
 }
