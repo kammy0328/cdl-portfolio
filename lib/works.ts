@@ -5,10 +5,10 @@ import { works as seedWorks, type Work } from "@/data/works";
 export const WORKS_BLOB_PATH = "works.json";
 
 /**
- * 포트폴리오 데이터 로드(항상 최신) — Vercel Blob의 works.json 우선,
+ * 포트폴리오 데이터 로드(필터 없음) — Vercel Blob의 works.json 우선,
  * 없거나 오류 시 시드 데이터로 안전 대체. 관리자(어드민)는 이 함수를 직접 사용.
  */
-export async function loadWorks(): Promise<Work[]> {
+export async function loadWorksRaw(): Promise<Work[]> {
   const token = process.env.BLOB_READ_WRITE_TOKEN;
   if (!token) return seedWorks;
   try {
@@ -20,14 +20,21 @@ export async function loadWorks(): Promise<Work[]> {
     if (!res.ok) return seedWorks;
     const data = (await res.json()) as Work[];
     if (!Array.isArray(data)) return seedWorks;
-    // 썸네일(유튜브 커버 = 시드의 still-01)은 스틸로 노출하지 않음
-    return data.map((w) => ({
-      ...w,
-      stills: (w.stills || []).filter((s) => !String(s.src).endsWith("still-01.jpg")),
-    }));
+    return data;
   } catch {
     return seedWorks;
   }
+}
+
+/**
+ * 공개 페이지용 — still-01.jpg(유튜브 커버 플레이스홀더) 제외 후 반환.
+ */
+export async function loadWorks(): Promise<Work[]> {
+  const data = await loadWorksRaw();
+  return data.map((w) => ({
+    ...w,
+    stills: (w.stills || []).filter((s) => !String(s.src).endsWith("still-01.jpg")),
+  }));
 }
 
 /**

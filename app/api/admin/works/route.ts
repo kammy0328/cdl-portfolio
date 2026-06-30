@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { isAuthed } from "@/lib/admin-auth";
-import { loadWorks, WORKS_BLOB_PATH } from "@/lib/works";
+import { loadWorksRaw, WORKS_BLOB_PATH } from "@/lib/works";
 
 export const runtime = "nodejs";
 
@@ -10,7 +10,7 @@ export async function GET() {
   if (!(await isAuthed())) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
-  return NextResponse.json({ ok: true, works: await loadWorks() });
+  return NextResponse.json({ ok: true, works: await loadWorksRaw() });
 }
 
 export async function POST(req: Request) {
