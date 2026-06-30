@@ -455,7 +455,9 @@ function WorkEditor({
             + 크레딧 추가
           </button>
         </div>
-        <div className="space-y-2">
+        {/* 붙여넣기 파싱 — "직무 | 이름" 형식, 빈 줄 무시 */}
+        <CreditPasteZone onPaste={(parsed) => onChange({ credits: [...work.credits, ...parsed] })} />
+        <div className="space-y-2 mt-3">
           {work.credits.map((c, ci) => (
             <div key={ci} className="flex gap-2">
               <input className={`${fieldCls} max-w-[10rem]`} placeholder="직무 (예: 감독)" value={c.role} onChange={(e) => onChange({ credits: work.credits.map((x, k) => (k === ci ? { ...x, role: e.target.value } : x)) })} />
@@ -536,6 +538,78 @@ function WorkEditor({
           이 작업 삭제
         </button>
       </div>
+    </div>
+  );
+}
+
+// ============================ Credit paste zone ============================
+
+function parseCredits(text: string): { role: string; name: string }[] {
+  return text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.includes("|"))
+    .map((line) => {
+      const idx = line.indexOf("|");
+      return {
+        role: line.slice(0, idx).trim(),
+        name: line.slice(idx + 1).trim(),
+      };
+    })
+    .filter((c) => c.role || c.name);
+}
+
+function CreditPasteZone({
+  onPaste,
+}: {
+  onPaste: (credits: { role: string; name: string }[]) => void;
+}) {
+  const [text, setText] = useState("");
+  const [preview, setPreview] = useState<{ role: string; name: string }[]>([]);
+
+  function handleChange(val: string) {
+    setText(val);
+    setPreview(parseCredits(val));
+  }
+
+  function handleApply() {
+    if (preview.length === 0) return;
+    onPaste(preview);
+    setText("");
+    setPreview([]);
+  }
+
+  return (
+    <div className="mb-3 rounded-sm border border-dashed border-ink-line p-3">
+      <p className="mb-2 text-xs text-bone-faint">
+        크레딧을 한 번에 붙여넣기 — <code className="text-bone-dim">직무 | 이름</code> 형식, 한 줄에 하나
+      </p>
+      <textarea
+        className={`${fieldCls} min-h-[80px] resize-y font-mono text-xs`}
+        placeholder={"Production | Memudworks\nDirector | Yang Siwook\nDI | CDL"}
+        value={text}
+        onChange={(e) => handleChange(e.target.value)}
+      />
+      {preview.length > 0 && (
+        <div className="mt-2">
+          <p className="mb-1 text-xs text-bone-faint">{preview.length}개 인식됨</p>
+          <div className="mb-2 max-h-32 overflow-y-auto space-y-0.5">
+            {preview.map((c, i) => (
+              <div key={i} className="flex gap-2 text-xs">
+                <span className="w-28 shrink-0 text-bone-dim">{c.role}</span>
+                <span className="text-bone">{c.name}</span>
+              </div>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={handleApply}
+            className="rounded-sm bg-bone px-3 py-1.5 text-xs font-medium text-ink transition hover:bg-accent-warm"
+          >
+            추가
+          </button>
+        </div>
+      )}
     </div>
   );
 }
