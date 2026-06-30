@@ -33,12 +33,18 @@ export async function POST(req: Request) {
   }
 
   const name = `stills/${crypto.randomUUID()}.webp`;
-  const blob = await put(name, file, {
-    access: "public",
-    contentType: "image/webp",
-    addRandomSuffix: false,
-    token,
-  });
+  let blob;
+  try {
+    blob = await put(name, file, {
+      access: "public",
+      contentType: "image/webp",
+      addRandomSuffix: false,
+      token,
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Blob 업로드 실패";
+    return NextResponse.json({ ok: false, error: msg }, { status: 500 });
+  }
 
   return NextResponse.json({ ok: true, src: blob.url, w, h });
 }

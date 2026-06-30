@@ -167,7 +167,10 @@ export default function Admin() {
         fd.append("file", blob, "still.webp");
         fd.append("w", String(w));
         fd.append("h", String(h));
-        const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 30_000);
+        const res = await fetch("/api/admin/upload", { method: "POST", body: fd, signal: ctrl.signal })
+          .finally(() => clearTimeout(timer));
         const r = await res.json().catch(() => ({ ok: false, error: `서버 오류 (${res.status})` }));
         if (r.ok) {
           setWorks((ws) =>
