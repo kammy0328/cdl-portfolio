@@ -156,8 +156,8 @@ export default function Lightbox({
             className="group absolute left-4 top-1/2 hidden -translate-y-1/2 items-center justify-center p-3 outline-none md:flex"
           >
             <svg
-              width="44" height="44"
-              viewBox="0 0 24 24"
+              width="36" height="64"
+              viewBox="0 0 24 42"
               fill="none"
               stroke="currentColor"
               strokeWidth="1.5"
@@ -165,7 +165,7 @@ export default function Lightbox({
               strokeLinejoin="round"
               className="text-white/20 transition-colors duration-300 group-hover:text-white"
             >
-              <path d="m15 18-6-6 6-6" />
+              <path d="m15 36-6-15 6-15" />
             </svg>
           </button>
           <button
@@ -174,8 +174,8 @@ export default function Lightbox({
             className="group absolute right-4 top-1/2 hidden -translate-y-1/2 items-center justify-center p-3 outline-none md:flex"
           >
             <svg
-              width="44" height="44"
-              viewBox="0 0 24 24"
+              width="36" height="64"
+              viewBox="0 0 24 42"
               fill="none"
               stroke="currentColor"
               strokeWidth="1.5"
@@ -183,7 +183,7 @@ export default function Lightbox({
               strokeLinejoin="round"
               className="text-white/20 transition-colors duration-300 group-hover:text-white"
             >
-              <path d="m9 18 6-6-6-6" />
+              <path d="m9 6 6 15-6 15" />
             </svg>
           </button>
         </>
