@@ -147,74 +147,61 @@ export default function Lightbox({
         </svg>
       </button>
 
-      {/* 화살표는 이미지와 같은 행에만 — 캡션 높이 무관하게 이미지 세로 중앙에 고정 */}
+      {/* 화살표: 뷰포트 기준 세로 정중앙 고정 (이미지 비율 무관) */}
+      {multi && (
+        <>
+          <button
+            onClick={(e) => { e.stopPropagation(); go(-1); }}
+            aria-label="Previous"
+            className="group absolute left-4 top-1/2 hidden -translate-y-1/2 items-center justify-center p-3 outline-none md:flex"
+          >
+            <svg
+              width="44" height="44"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-white/20 transition-colors duration-300 group-hover:text-white"
+            >
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); go(1); }}
+            aria-label="Next"
+            className="group absolute right-4 top-1/2 hidden -translate-y-1/2 items-center justify-center p-3 outline-none md:flex"
+          >
+            <svg
+              width="44" height="44"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-white/20 transition-colors duration-300 group-hover:text-white"
+            >
+              <path d="m9 18 6-6-6-6" />
+            </svg>
+          </button>
+        </>
+      )}
+
+      {/* 이미지 + 캡션 */}
       <figure
-        className="flex min-w-0 flex-col items-center"
+        className="flex min-w-0 flex-col items-center px-20"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* 이미지 행: [← 화살표] [img] [→ 화살표] */}
-        <div className="flex items-center gap-2 md:gap-6 px-2">
-
-          {/* 이전 화살표 */}
-          <div className="hidden md:flex shrink-0 w-16 justify-center">
-            {multi && (
-              <button
-                onClick={(e) => { e.stopPropagation(); go(-1); }}
-                aria-label="Previous"
-                className="group flex items-center justify-center p-3 outline-none"
-              >
-                <svg
-                  width="44" height="44"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-white/20 transition-colors duration-300 group-hover:text-white"
-                >
-                  <path d="m15 18-6-6 6-6" />
-                </svg>
-              </button>
-            )}
-          </div>
-
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={current.src}
-            alt={current.caption ?? ""}
-            onContextMenu={(e) => e.preventDefault()}
-            draggable={false}
-            className="block max-h-[78vh] max-w-[min(calc(100vw-12rem),94vw)] select-none md:max-w-[min(calc(100vw-14rem),94vw)]"
-          />
-
-          {/* 다음 화살표 */}
-          <div className="hidden md:flex shrink-0 w-16 justify-center">
-            {multi && (
-              <button
-                onClick={(e) => { e.stopPropagation(); go(1); }}
-                aria-label="Next"
-                className="group flex items-center justify-center p-3 outline-none"
-              >
-                <svg
-                  width="44" height="44"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-white/20 transition-colors duration-300 group-hover:text-white"
-                >
-                  <path d="m9 18 6-6-6-6" />
-                </svg>
-              </button>
-            )}
-          </div>
-
-        </div>
-
-        {/* 캡션 — 이미지 행 아래 */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={current.src}
+          alt={current.caption ?? ""}
+          onContextMenu={(e) => e.preventDefault()}
+          draggable={false}
+          className="block max-h-[78vh] max-w-[min(calc(100vw-10rem),94vw)] select-none"
+        />
         <figcaption className="mt-5 flex flex-col items-center gap-3 text-center">
           {current.caption && (
             <span className="text-sm text-bone-dim">{current.caption}</span>
