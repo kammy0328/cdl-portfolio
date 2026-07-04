@@ -6,7 +6,8 @@ export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Gallery",
-  description: "Color grading stills by CDL.",
+  description:
+    "뮤직비디오, 영화, 단편영화 색보정 스틸 갤러리 — CDL 컬러리스트. Color grading stills by CDL.",
 };
 
 export default async function GalleryPage() {
