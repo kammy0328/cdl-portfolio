@@ -37,9 +37,6 @@ export default async function Home() {
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
             CDL — Colorist
           </h1>
-          <p className="mt-4 text-base leading-relaxed text-bone-dim">
-            뮤직비디오, 영화, 단편영화 색보정을 전문으로 하는 컬러리스트 CDL의 포트폴리오입니다.
-          </p>
         </header>
         <div className="grid gap-x-8 gap-y-12 sm:grid-cols-2">
           {works.map((w, i) => (
